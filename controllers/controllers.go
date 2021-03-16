@@ -1,11 +1,11 @@
 package controllers
 
 import (
-	"contacts/auth"
-	"contacts/models"
-	"contacts/util"
 	"encoding/json"
 	"net/http"
+	"notes/auth"
+	"notes/models"
+	"notes/util"
 )
 
 //CreateAccount controller
@@ -35,27 +35,27 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	util.Respond(w, resp)
 }
 
-//CreateContact for user controller
-var CreateContact = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
+//CreateNote for user controller
+var CreateNote = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(uint)
-	contact := &models.Contact{}
-	if err := json.NewDecoder(r.Body).Decode(contact); err != nil {
+	note := &models.Note{}
+	if err := json.NewDecoder(r.Body).Decode(note); err != nil {
 		resp := util.Message(false, "Invalid request")
 		util.Respond(w, resp)
 	}
 
-	contact.UserID = user
-	resp := contact.Create()
+	note.UserID = user
+	resp := note.Create()
 	util.Respond(w, resp)
 })
 
-//GetContacts for user controller
-var GetContacts = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
+//GetNotes for user controller
+var GetNotes = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(uint)
 
-	contacts := models.GetContacts(user)
-	resp := util.Message(true, "Contacts fetched")
-	resp["contacts"] = contacts
+	notes := models.GetNotes(user)
+	resp := util.Message(true, "Notes fetched")
+	resp["notes"] = notes
 
 	util.Respond(w, resp)
 })

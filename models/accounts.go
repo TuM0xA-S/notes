@@ -1,9 +1,9 @@
 package models
 
 import (
-	"contacts/auth"
-	. "contacts/config"
-	"contacts/util"
+	"notes/auth"
+	. "notes/config"
+	"notes/util"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"

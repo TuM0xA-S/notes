@@ -18,5 +18,5 @@ func Init(conn *gorm.DB) {
 
 // Migrate ...
 func Migrate() {
-	GetDB().Debug().AutoMigrate(&Account{}, &Contact{})
+	GetDB().Debug().AutoMigrate(&Account{}, &Note{})
 }

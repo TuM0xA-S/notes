@@ -1,10 +1,10 @@
 package auth
 
 import (
-	. "contacts/config"
-	"contacts/util"
 	"context"
 	"net/http"
+	. "notes/config"
+	"notes/util"
 	"strings"
 
 	jwt "github.com/dgrijalva/jwt-go"

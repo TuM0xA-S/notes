@@ -1,22 +1,22 @@
 package models
 
 import (
-	"contacts/util"
 	"log"
+	"notes/util"
 
 	"gorm.io/gorm"
 )
 
-//Contact with name, phone and owner
-type Contact struct {
+//Note with name, phone and owner
+type Note struct {
 	gorm.Model
 	Name   string `json:"name"`
 	Phone  string `json:"phone"`
 	UserID uint   `json:"user_id"`
 }
 
-//Validate contact
-func (c *Contact) Validate() (map[string]interface{}, bool) {
+//Validate note
+func (c *Note) Validate() (map[string]interface{}, bool) {
 	if c.Name == "" {
 		return util.Message(false, "Validation error. Name is empty"), false
 	}
@@ -31,8 +31,8 @@ func (c *Contact) Validate() (map[string]interface{}, bool) {
 	return util.Message(true, "Validation OK"), true
 }
 
-//Create contact
-func (c *Contact) Create() map[string]interface{} {
+//Create note
+func (c *Note) Create() map[string]interface{} {
 	if resp, ok := c.Validate(); !ok {
 		return resp
 	}
@@ -42,15 +42,15 @@ func (c *Contact) Create() map[string]interface{} {
 	}
 
 	resp := util.Message(true, "Succesfully created")
-	resp["contact"] = c
+	resp["note"] = c
 
 	return resp
 }
 
-//GetContact by id
-func GetContact(id uint) *Contact {
-	c := &Contact{}
-	err := GetDB().Table("contacts").Where("id = ?", id).First(c).Error
+//GetNote by id
+func GetNote(id uint) *Note {
+	c := &Note{}
+	err := GetDB().Table("notes").Where("id = ?", id).First(c).Error
 	if err != nil {
 		return nil
 	}
@@ -58,14 +58,14 @@ func GetContact(id uint) *Contact {
 	return c
 }
 
-//GetContacts for user
-func GetContacts(user uint) []*Contact {
-	contacts := []*Contact{}
-	err := GetDB().Table("contacts").Where("user_id = ?", user).Find(&contacts).Error
+//GetNotes for user
+func GetNotes(user uint) []*Note {
+	notes := []*Note{}
+	err := GetDB().Table("notes").Where("user_id = ?", user).Find(&notes).Error
 	log.Println(err)
 	if err != nil {
 		return nil
 	}
 
-	return contacts
+	return notes
 }

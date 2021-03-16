@@ -1,12 +1,12 @@
 package main
 
 import (
-	"contacts/controllers"
-	"contacts/models"
 	"log"
 	"net/http"
+	"notes/controllers"
+	"notes/models"
 
-	"contacts/config"
+	"notes/config"
 
 	"github.com/gorilla/mux"
 	"gorm.io/driver/mysql"
@@ -19,8 +19,8 @@ func getRouter() *mux.Router {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/user/new", controllers.CreateAccount).Methods("POST")
 	router.HandleFunc("/api/user/login", controllers.Login).Methods("POST")
-	router.HandleFunc("/api/me/contacts", controllers.GetContacts).Methods("GET")
-	router.HandleFunc("/api/me/contacts/create", controllers.CreateContact).Methods("POST")
+	router.HandleFunc("/api/me/notes", controllers.GetNotes).Methods("GET")
+	router.HandleFunc("/api/me/notes/create", controllers.CreateNote).Methods("POST")
 	return router
 }
 
