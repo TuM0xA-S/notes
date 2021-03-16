@@ -2,19 +2,18 @@ package main
 
 import (
 	"contacts/controllers"
+	"contacts/models"
 	"log"
 	"net/http"
-	"os"
+
+	"contacts/config"
 
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
-func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatalf("when loading env: %v", err)
-	}
-}
+var Cfg = config.Cfg
 
 func getRouter() *mux.Router {
 	router := mux.NewRouter()
@@ -26,14 +25,16 @@ func getRouter() *mux.Router {
 }
 
 func main() {
+	conn, err := gorm.Open(mysql.Open(Cfg.DBURI))
+	if err != nil {
+		log.Fatal("when connecting to db:", err)
+	}
+	models.Init(conn)
+	models.Migrate()
 
 	router := getRouter()
-	host := os.Getenv("port")
-	if host == "" {
-		host = ":8000"
-	}
 
-	if err := http.ListenAndServe(host, router); err != nil {
+	if err := http.ListenAndServe(Cfg.Host, router); err != nil {
 		log.Printf("when serving: %v", err)
 	}
 }

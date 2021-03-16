@@ -1,10 +1,10 @@
 package auth
 
 import (
+	. "contacts/config"
 	"contacts/util"
 	"context"
 	"net/http"
-	"os"
 	"strings"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -41,7 +41,7 @@ func RequireAuth(hand http.HandlerFunc) http.HandlerFunc {
 		tk := &Token{}
 		token, err := jwt.ParseWithClaims(tokenPart, tk,
 			func(token *jwt.Token) (interface{}, error) {
-				return []byte(os.Getenv("token_password")), nil
+				return []byte(Cfg.TokenPassword), nil
 			})
 
 		if err != nil {

@@ -2,8 +2,8 @@ package models
 
 import (
 	"contacts/auth"
+	. "contacts/config"
 	"contacts/util"
-	"os"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
@@ -56,7 +56,7 @@ func (a *Account) Create() map[string]interface{} {
 
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), &auth.Token{UserID: a.ID})
 
-	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
+	tokenString, _ := token.SignedString([]byte(Cfg.TokenPassword))
 	a.Token = tokenString
 
 	a.Password = ""
@@ -83,7 +83,7 @@ func Login(email, password string) map[string]interface{} {
 	a.Password = ""
 
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), &auth.Token{UserID: a.ID})
-	a.Token, _ = token.SignedString([]byte(os.Getenv("token_password")))
+	a.Token, _ = token.SignedString([]byte(Cfg.TokenPassword))
 
 	resp := util.Message(true, "Logged In")
 	resp["account"] = a
