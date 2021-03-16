@@ -16,7 +16,18 @@ func Init(conn *gorm.DB) {
 	db = conn
 }
 
+var activeModels = []interface{}{&Account{}, &Note{}}
+
 // Migrate ...
 func Migrate() {
-	GetDB().Debug().AutoMigrate(&Account{}, &Note{})
+	if err := GetDB().Debug().AutoMigrate(activeModels...); err != nil {
+		panic("when tryin to migrate: " + err.Error())
+	}
+}
+
+//Truncate ...
+func Truncate() {
+	for _, m := range activeModels {
+		GetDB().Unscoped().Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(m)
+	}
 }

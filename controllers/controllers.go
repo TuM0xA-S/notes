@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"notes/auth"
 	"notes/models"
@@ -13,6 +14,7 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 	a := &models.Account{}
 	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(a); err != nil {
+		log.Println(err, a)
 		util.Respond(w, util.Message(false, "Invalid request"))
 		return
 	}
@@ -28,9 +30,10 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(a); err != nil {
 		util.Respond(w, util.Message(false, "Invalide request"))
+		return
 	}
 
-	resp := models.Login(a.Email, a.Password)
+	resp := models.Login(a.Username, a.Password)
 
 	util.Respond(w, resp)
 }
@@ -42,6 +45,7 @@ var CreateNote = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(note); err != nil {
 		resp := util.Message(false, "Invalid request")
 		util.Respond(w, resp)
+		return
 	}
 
 	note.UserID = user

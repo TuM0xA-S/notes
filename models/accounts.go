@@ -4,7 +4,6 @@ import (
 	"notes/auth"
 	. "notes/config"
 	"notes/util"
-	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
@@ -14,31 +13,38 @@ import (
 //Account model
 type Account struct {
 	gorm.Model
-	Email    string `json:"email"`
+	Username string `json:"username"`
 	Password string `json:"password"`
 	Token    string `json:"token" sql:"-"`
 }
 
 //Validate validates account data
 func (a *Account) Validate() (map[string]interface{}, bool) {
-	if !strings.Contains(a.Email, "@") {
-		return util.Message(false, "Email address is required"), false
+	if len(a.Username) < 4 {
+		return util.Message(false, "Username is required(min len 4)"), false
 	}
 
 	if len(a.Password) < 6 {
-		return util.Message(false, "Password is required"), false
+		return util.Message(false, "Password is required(min len 6)"), false
 	}
 
 	temp := &Account{}
-	err := GetDB().Table("accounts").Where("email = ?", a.Email).First(temp).Error
+	err := GetDB().Table("accounts").Where("username = ?", a.Username).First(temp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return util.Message(false, "Connection error. Please retry"), false
 	}
-	if temp.Email != "" {
-		return util.Message(false, "Connection error. Email address already in use by another user"), false
+	if temp.Username != "" {
+		return util.Message(false, "Username is already in use"), false
 	}
 
 	return util.Message(true, "Requitement passed"), true
+}
+
+// HashPassword generates hash for password (WOW)
+func HashPassword(password string) string {
+	hashBytes, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hash := string(hashBytes)
+	return hash
 }
 
 //Create account in db
@@ -47,8 +53,7 @@ func (a *Account) Create() map[string]interface{} {
 		return resp
 	}
 
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(a.Password), bcrypt.DefaultCost)
-	a.Password = string(hashedPassword)
+	a.Password = HashPassword(a.Password)
 
 	if GetDB().Create(a).Error != nil {
 		return util.Message(false, "Connection error. Failed to create account")
@@ -68,10 +73,10 @@ func (a *Account) Create() map[string]interface{} {
 }
 
 //Login user
-func Login(email, password string) map[string]interface{} {
+func Login(username, password string) map[string]interface{} {
 	a := &Account{}
-	if err := GetDB().Table("accounts").Where("email = ?", email).First(a).Error; err == gorm.ErrRecordNotFound {
-		return util.Message(false, "Email address not found")
+	if err := GetDB().Table("accounts").Where("username = ?", username).First(a).Error; err == gorm.ErrRecordNotFound {
+		return util.Message(false, "Username not found")
 	} else if err != nil {
 		return util.Message(false, "Connection error. Please retry")
 	}
