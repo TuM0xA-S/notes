@@ -9,9 +9,24 @@ import (
 	"notes/util"
 )
 
+// MessageFromError ....
+func MessageFromError(err error) map[string]interface{} {
+	res := map[string]interface{}{}
+	res["message"] = "OK"
+	res["status"] = true
+
+	if err != nil {
+		res["message"] = err.Error()
+		res["status"] = false
+	}
+
+	return res
+}
+
 //CreateAccount controller
 func CreateAccount(w http.ResponseWriter, r *http.Request) {
 	a := &models.Account{}
+
 	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(a); err != nil {
 		log.Println(err, a)
@@ -19,22 +34,25 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := a.Create()
-	util.Respond(w, resp)
+	err := a.Create()
+	util.Respond(w, MessageFromError(err))
 }
 
 //Login controller
 func Login(w http.ResponseWriter, r *http.Request) {
 	a := &models.Account{}
-	defer r.Body.Close()
 
+	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(a); err != nil {
 		util.Respond(w, util.Message(false, "Invalide request"))
 		return
 	}
 
-	resp := models.Login(a.Username, a.Password)
-
+	accessToken, err := a.Login()
+	resp := MessageFromError(err)
+	if err == nil {
+		resp["access_token"] = accessToken
+	}
 	util.Respond(w, resp)
 }
 
@@ -42,6 +60,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 var CreateNote = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(uint)
 	note := &models.Note{}
+	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(note); err != nil {
 		resp := util.Message(false, "Invalid request")
 		util.Respond(w, resp)
@@ -49,8 +68,8 @@ var CreateNote = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	}
 
 	note.UserID = user
-	resp := note.Create()
-	util.Respond(w, resp)
+	err := note.Create()
+	util.Respond(w, MessageFromError(err))
 })
 
 //GetNotes for user controller
@@ -58,7 +77,7 @@ var GetNotes = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(uint)
 
 	notes := models.GetNotes(user)
-	resp := util.Message(true, "Notes fetched")
+	resp := util.Message(true, "OK")
 	resp["notes"] = notes
 
 	util.Respond(w, resp)

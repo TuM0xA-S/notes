@@ -32,9 +32,7 @@ func UserBodyDataTest() io.Reader {
 
 func CreateUserTest() *models.Account {
 	user := UserTest()
-	user.Password = models.HashPassword(user.Password)
-	models.GetDB().Create(user)
-
+	user.Create()
 	return user
 }
 

@@ -1,8 +1,8 @@
 package models
 
 import (
+	"fmt"
 	"log"
-	"notes/util"
 
 	"gorm.io/gorm"
 )
@@ -16,35 +16,32 @@ type Note struct {
 }
 
 //Validate note
-func (c *Note) Validate() (map[string]interface{}, bool) {
+func (c *Note) Validate() error {
 	if c.Title == "" {
-		return util.Message(false, "Validation error. Title is empty"), false
+		return fmt.Errorf("Validation error. Title is empty")
 	}
 	if c.Body == "" {
-		return util.Message(false, "Validation error. Body is empty"), false
+		return fmt.Errorf("Validation error. Body is empty")
 	}
 
 	if c.UserID <= 0 {
-		return util.Message(false, "Validation error. UserID is invalid"), false
+		return fmt.Errorf("Validation error. UserID is invalid")
 	}
 
-	return util.Message(true, "Validation OK"), true
+	return nil
 }
 
 //Create note
-func (c *Note) Create() map[string]interface{} {
-	if resp, ok := c.Validate(); !ok {
-		return resp
+func (c *Note) Create() error {
+	if err := c.Validate(); err != nil {
+		return err
 	}
 
 	if GetDB().Create(c).Error != nil {
-		return util.Message(false, "Failed to create")
+		return fmt.Errorf("Failed to create")
 	}
 
-	resp := util.Message(true, "Succesfully created")
-	resp["note"] = c
-
-	return resp
+	return nil
 }
 
 //GetNote by id

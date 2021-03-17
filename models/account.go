@@ -1,9 +1,9 @@
 package models
 
 import (
+	"fmt"
 	"notes/auth"
 	. "notes/config"
-	"notes/util"
 
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
@@ -18,25 +18,25 @@ type Account struct {
 }
 
 //Validate validates account data
-func (a *Account) Validate() (map[string]interface{}, bool) {
+func (a *Account) Validate() error {
 	if len(a.Username) < 4 {
-		return util.Message(false, "Username is required(min len 4)"), false
+		return fmt.Errorf("Username is required(min len 4)")
 	}
 
 	if len(a.Password) < 6 {
-		return util.Message(false, "Password is required(min len 6)"), false
+		return fmt.Errorf("Password is required(min len 6)")
 	}
 
 	temp := &Account{}
 	err := GetDB().Table("accounts").Where("username = ?", a.Username).First(temp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
-		return util.Message(false, "Connection error. Please retry"), false
+		return fmt.Errorf("Connection error. Please retry")
 	}
 	if temp.Username != "" {
-		return util.Message(false, "Username is already in use"), false
+		return fmt.Errorf("Username is already in use")
 	}
 
-	return util.Message(true, "Requitement passed"), true
+	return nil
 }
 
 // HashPassword generates hash for password (WOW)
@@ -47,23 +47,21 @@ func HashPassword(password string) string {
 }
 
 //Create account in db
-func (a *Account) Create() map[string]interface{} {
-	if resp, ok := a.Validate(); !ok {
-		return resp
+func (a *Account) Create() error {
+	if err := a.Validate(); err != nil {
+		return err
 	}
 
 	a.Password = HashPassword(a.Password)
 
 	if GetDB().Create(a).Error != nil {
-		return util.Message(false, "Connection error. Failed to create account")
+		return fmt.Errorf("Connection error. Failed to create account")
 	}
 
-	resp := util.Message(true, "Account has been created")
-	resp["account"] = a
-
-	return resp
+	return nil
 }
 
+// GenerateToken for user
 func GenerateToken(uid uint) string {
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), &auth.Token{UserID: uid})
 	accessToken, _ := token.SignedString([]byte(Cfg.TokenPassword))
@@ -71,23 +69,19 @@ func GenerateToken(uid uint) string {
 }
 
 //Login user
-func Login(username, password string) map[string]interface{} {
-	a := &Account{}
-	if err := GetDB().Table("accounts").Where("username = ?", username).First(a).Error; err == gorm.ErrRecordNotFound {
-		return util.Message(false, "Username not found")
+func (a *Account) Login() (string, error) {
+	password := a.Password
+	if err := GetDB().Table("accounts").Where("username = ?", a.Username).First(a).Error; err == gorm.ErrRecordNotFound {
+		return "", fmt.Errorf("Username not found")
 	} else if err != nil {
-		return util.Message(false, "Connection error. Please retry")
+		return "", fmt.Errorf("Connection error")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(a.Password), []byte(password)); err != nil {
-		return util.Message(false, "Invalid login credentials. Please retry")
+		return "", fmt.Errorf("Invalid login credentials")
 	}
 
-	resp := util.Message(true, "Logged In")
-	resp["access_token"] = GenerateToken(a.ID)
-	a.Password = password
-	resp["account"] = a
-	return resp
+	return GenerateToken(a.ID), nil
 }
 
 //GetUser by id
