@@ -17,11 +17,11 @@ type Note struct {
 
 //Validate note
 func (c *Note) Validate() error {
-	if c.Title == "" {
-		return fmt.Errorf("Validation error. Title is empty")
+	if len(c.Title) < 3 || len(c.Title) > 40 {
+		return fmt.Errorf("Validation error. Title len should be (3 <= len <= 40)")
 	}
-	if c.Body == "" {
-		return fmt.Errorf("Validation error. Body is empty")
+	if len(c.Body) > 512 {
+		return fmt.Errorf("Validation error. Body is too big(max len 512)")
 	}
 
 	if c.UserID <= 0 {

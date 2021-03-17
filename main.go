@@ -16,6 +16,7 @@ import (
 // GetRouter returns prepared router
 func GetRouter() *mux.Router {
 	router := mux.NewRouter()
+	router.Use(jsonMiddleware)
 	router.HandleFunc("/api/user/create", controllers.CreateAccount).Methods("POST")
 	router.HandleFunc("/api/user/login", controllers.Login).Methods("POST")
 	router.HandleFunc("/api/me/notes", controllers.GetNotes).Methods("GET")
@@ -24,6 +25,13 @@ func GetRouter() *mux.Router {
 	router.HandleFunc("/api/me/notes/{note_id:[0-9]+}/remove", controllers.NoteRemove).Methods("POST")
 	router.HandleFunc("/api/me", controllers.UserDetails).Methods("GET")
 	return router
+}
+
+func jsonMiddleware(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		h.ServeHTTP(w, r)
+	})
 }
 
 func main() {

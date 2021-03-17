@@ -44,7 +44,7 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 
 // GetUserID from request
 func GetUserID(req *http.Request) uint {
-	return req.Context().Value("user").(uint)
+	return req.Context().Value(auth.UserID).(uint)
 }
 
 //Login controller

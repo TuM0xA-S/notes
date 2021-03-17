@@ -73,6 +73,7 @@ func (n *NotesTestSuite) TestCreateUser() {
 	r := Must(http.Post(n.ts.URL+"/api/user/create", "application/json", UserBodyDataTest()))
 
 	n.Require().Equal(200, r.StatusCode)
+	n.Require().Equal("application/json", r.Header.Get("Content-Type"))
 
 	rd := &ResponseData{}
 	n.Require().Nil(json.NewDecoder(r.Body).Decode(rd))
@@ -231,6 +232,11 @@ func (n *NotesTestSuite) TestUnauth() {
 		resp := Must(client.Do(req))
 		n.Assert().Equal(403, resp.StatusCode)
 	}
+}
+
+func (n *NotesTestSuite) TestUnauthContentType() {
+	resp := Must(http.Get(n.ts.URL + "/api/me"))
+	n.Require().Equal("application/json", resp.Header.Get("Content-Type"))
 }
 
 func TestNotesTestSuite(t *testing.T) {

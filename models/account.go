@@ -19,12 +19,12 @@ type Account struct {
 
 //Validate validates account data
 func (a *Account) Validate() error {
-	if len(a.Username) < 4 {
-		return fmt.Errorf("Username is required(min len 4)")
+	if len(a.Username) < 4 || len(a.Username) > 20 {
+		return fmt.Errorf("Username is required(4 <= len <= 20)")
 	}
 
-	if len(a.Password) < 6 {
-		return fmt.Errorf("Password is required(min len 6)")
+	if len(a.Password) < 6 || len(a.Password) > 30 {
+		return fmt.Errorf("Password is required(6 <= len <= 30)")
 	}
 
 	temp := &Account{}
