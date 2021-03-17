@@ -12,10 +12,10 @@ action      | url
 ----------- | ---------------
 create user | `/api/user/create`
 login	    | `/api/user/login`
-create note | `/api/api/me/notes/create`
-note detail | `/api/api/me/notes/{note_id}`
-remove note | `/api/api/me/notes/{note_id}/remove`
-user detail | `/api/api/me`
+create note | `/api/me/notes/create`
+note detail | `/api/me/notes/{note_id}`
+remove note | `/api/me/notes/{note_id}/remove`
+user detail | `/api/me`
 
 * to regiser/login provide username and password
 * title and body to create note
