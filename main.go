@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"notes/controllers"
@@ -35,7 +36,9 @@ func jsonMiddleware(h http.Handler) http.Handler {
 }
 
 func main() {
-	conn, err := gorm.Open(mysql.Open(Cfg.DBURI))
+	DBURI := fmt.Sprintf("root:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", Cfg.DBPassword, Cfg.DBHost, Cfg.DBName)
+	log.Println("db_uri:", DBURI)
+	conn, err := gorm.Open(mysql.Open(DBURI))
 	if err != nil {
 		log.Fatal("when connecting to db:", err)
 	}

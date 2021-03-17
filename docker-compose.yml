@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  db:
+    image: mysql
+    volumes: 
+      - data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: $DB_PASSWORD
+      MYSQL_DATABASE: $DB_NAME
+    restart: always
+
+  api:
+    build: .
+    env_file: .env
+    ports:
+      - 8000:8000
+    restart: always
+
+volumes:
+  data:
