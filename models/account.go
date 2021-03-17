@@ -71,7 +71,7 @@ func GenerateToken(uid uint) string {
 //Login user
 func (a *Account) Login() (string, error) {
 	password := a.Password
-	if err := GetDB().Table("accounts").Where("username = ?", a.Username).First(a).Error; err == gorm.ErrRecordNotFound {
+	if err := GetDB().Where("username = ?", a.Username).First(a).Error; err == gorm.ErrRecordNotFound {
 		return "", fmt.Errorf("Username not found")
 	} else if err != nil {
 		return "", fmt.Errorf("Connection error")
@@ -87,7 +87,7 @@ func (a *Account) Login() (string, error) {
 //GetUser by id
 func GetUser(u uint) *Account {
 	a := &Account{}
-	if err := GetDB().Table("accounts").Where("id = ?", u).First(a).Error; err != nil {
+	if err := GetDB().Where("id = ?", u).First(a).Error; err != nil {
 		return nil
 	}
 

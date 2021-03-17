@@ -55,9 +55,6 @@ func (n *NotesTestSuite) SetupSuite() {
 	n.ts = httptest.NewServer(GetRouter())
 
 	models.Init(conn)
-}
-
-func (n *NotesTestSuite) SetupTest() {
 	models.Migrate()
 }
 
