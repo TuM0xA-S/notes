@@ -20,6 +20,9 @@ func GetRouter() *mux.Router {
 	router.HandleFunc("/api/user/login", controllers.Login).Methods("POST")
 	router.HandleFunc("/api/me/notes", controllers.GetNotes).Methods("GET")
 	router.HandleFunc("/api/me/notes/create", controllers.CreateNote).Methods("POST")
+	router.HandleFunc("/api/me/notes/{note_id:[0-9]+}", controllers.NoteDetails).Methods("GET")
+	router.HandleFunc("/api/me/notes/{note_id:[0-9]+}/remove", controllers.NoteRemove).Methods("POST")
+	router.HandleFunc("/api/me", controllers.UserDetails).Methods("GET")
 	return router
 }
 
