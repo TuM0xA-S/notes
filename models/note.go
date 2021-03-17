@@ -10,18 +10,18 @@ import (
 //Note with name, phone and owner
 type Note struct {
 	gorm.Model
-	Name   string `json:"name"`
-	Phone  string `json:"phone"`
+	Title  string `json:"title"`
+	Body   string `json:"body"`
 	UserID uint   `json:"user_id"`
 }
 
 //Validate note
 func (c *Note) Validate() (map[string]interface{}, bool) {
-	if c.Name == "" {
-		return util.Message(false, "Validation error. Name is empty"), false
+	if c.Title == "" {
+		return util.Message(false, "Validation error. Title is empty"), false
 	}
-	if c.Phone == "" {
-		return util.Message(false, "Validation error. Phone is empty"), false
+	if c.Body == "" {
+		return util.Message(false, "Validation error. Body is empty"), false
 	}
 
 	if c.UserID <= 0 {

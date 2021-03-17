@@ -15,7 +15,6 @@ type Account struct {
 	gorm.Model
 	Username string `json:"username"`
 	Password string `json:"password"`
-	Token    string `json:"token" sql:"-"`
 }
 
 //Validate validates account data
@@ -59,17 +58,16 @@ func (a *Account) Create() map[string]interface{} {
 		return util.Message(false, "Connection error. Failed to create account")
 	}
 
-	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), &auth.Token{UserID: a.ID})
-
-	tokenString, _ := token.SignedString([]byte(Cfg.TokenPassword))
-	a.Token = tokenString
-
-	a.Password = ""
-
 	resp := util.Message(true, "Account has been created")
 	resp["account"] = a
 
 	return resp
+}
+
+func GenerateToken(uid uint) string {
+	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), &auth.Token{UserID: uid})
+	accessToken, _ := token.SignedString([]byte(Cfg.TokenPassword))
+	return accessToken
 }
 
 //Login user
@@ -85,12 +83,9 @@ func Login(username, password string) map[string]interface{} {
 		return util.Message(false, "Invalid login credentials. Please retry")
 	}
 
-	a.Password = ""
-
-	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), &auth.Token{UserID: a.ID})
-	a.Token, _ = token.SignedString([]byte(Cfg.TokenPassword))
-
 	resp := util.Message(true, "Logged In")
+	resp["access_token"] = GenerateToken(a.ID)
+	a.Password = password
 	resp["account"] = a
 	return resp
 }
