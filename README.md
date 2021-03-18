@@ -11,8 +11,8 @@ useless, but production ready(?)
 action      | request
 ----------- | ---------------
 create user | `POST /api/user/create`
-login	    | `POST /api/user/login`
-create note | `GET /api/me/notes`
+login	      | `POST /api/user/login`
+notes list  | `GET /api/me/notes`
 create note | `POST /api/me/notes/create`
 note detail | `GET /api/me/notes/{note_id}`
 remove note | `POST /api/me/notes/{note_id}/remove`
