@@ -10,12 +10,13 @@ import (
 	. "notes/config"
 
 	"github.com/gorilla/mux"
+	"github.com/urfave/negroni"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 // GetRouter returns prepared router
-func GetRouter() *mux.Router {
+func GetRouter() http.Handler {
 	router := mux.NewRouter()
 	router.Use(jsonMiddleware)
 	router.HandleFunc("/api/user/create", controllers.CreateAccount).Methods("POST")
@@ -25,7 +26,10 @@ func GetRouter() *mux.Router {
 	router.HandleFunc("/api/me/notes/{note_id:[0-9]+}", controllers.NoteDetails).Methods("GET")
 	router.HandleFunc("/api/me/notes/{note_id:[0-9]+}/remove", controllers.NoteRemove).Methods("POST")
 	router.HandleFunc("/api/me", controllers.UserDetails).Methods("GET")
-	return router
+
+	n := negroni.New(negroni.NewRecovery(), negroni.NewLogger())
+	n.UseHandler(router)
+	return n
 }
 
 func jsonMiddleware(h http.Handler) http.Handler {
