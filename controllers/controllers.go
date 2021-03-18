@@ -82,8 +82,12 @@ var CreateNote = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 
 //GetNotes for user controller
 var GetNotes = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
-
-	notes := models.GetNotes(GetUserID(r))
+	notes := &[]map[string]interface{}{}
+	err := models.GetDB().Model(&models.Note{}).Select("title", "id").Find(notes, "user_id = ?", GetUserID(r)).Error
+	if err != nil {
+		util.Respond(w, util.Message(false, "error with db"))
+		return
+	}
 	resp := util.Message(true, "OK")
 	resp["notes"] = notes
 
@@ -132,6 +136,7 @@ var UserDetails = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) 
 	user := &models.Account{}
 	models.GetDB().Take(user, userID)
 	resp := util.Message(true, "OK")
+	user.Password = "<hashed>"
 	resp["user"] = user
 	util.Respond(w, resp)
 })

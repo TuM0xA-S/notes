@@ -12,7 +12,7 @@ import (
 
 //Account model
 type Account struct {
-	gorm.Model
+	Model
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
@@ -82,15 +82,4 @@ func (a *Account) Login() (string, error) {
 	}
 
 	return GenerateToken(a.ID), nil
-}
-
-//GetUser by id
-func GetUser(u uint) *Account {
-	a := &Account{}
-	if err := GetDB().Where("id = ?", u).First(a).Error; err != nil {
-		return nil
-	}
-
-	a.Password = ""
-	return a
 }

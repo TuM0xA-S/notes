@@ -209,7 +209,7 @@ func (n *NotesTestSuite) TestUserDetail() {
 	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
 
 	n.Assert().Equal(user.Username, rd.User.Username)
-	n.Assert().Equal(user.Password, rd.User.Password)
+	n.Assert().Equal("<hashed>", rd.User.Password)
 }
 
 func (n *NotesTestSuite) TestUnauth() {

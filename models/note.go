@@ -2,13 +2,11 @@ package models
 
 import (
 	"fmt"
-
-	"gorm.io/gorm"
 )
 
 //Note with title, body and ownwer
 type Note struct {
-	gorm.Model
+	Model
 	Title  string `json:"title"`
 	Body   string `json:"body"`
 	UserID uint   `json:"user_id"`
@@ -41,15 +39,4 @@ func (n *Note) Create() error {
 	}
 
 	return nil
-}
-
-//GetNotes for user
-func GetNotes(user uint) []*Note {
-	notes := []*Note{}
-	err := GetDB().Where("user_id = ?", user).Find(&notes).Error
-	if err != nil {
-		return nil
-	}
-
-	return notes
 }
