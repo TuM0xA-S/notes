@@ -23,3 +23,9 @@ published notes | `GET /api/notes`
 * to regiser/login provide `username` and `password`
 * `title` and `body` to create note
 * note can be published by setting `published` field to `true`
+
+tasks
+* [x] api base
+* [ ] pagination
+* [ ] filters
+
