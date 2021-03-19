@@ -40,3 +40,18 @@ func (n *Note) Create() error {
 
 	return nil
 }
+
+//Get note
+func (n *Note) Get() error {
+	return GetDB().Where(n).Take(n).Error
+}
+
+//Remove note
+func (n *Note) Remove() error {
+	return GetDB().Where(n).Delete(n).Error
+}
+
+//Update note
+func (n *Note) Update(patch *Note) error {
+	return GetDB().Where(n).Updates(patch).Error
+}

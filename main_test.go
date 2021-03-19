@@ -75,7 +75,7 @@ func (n *NotesTestSuite) TestCreateUser() {
 	rd := &ResponseData{}
 	n.Require().Nil(json.NewDecoder(r.Body).Decode(rd))
 
-	n.Require().True(rd.Status, rd.Message)
+	n.Require().True(rd.Success, rd.Message)
 
 	user := UserTest()
 
@@ -91,7 +91,7 @@ func (n *NotesTestSuite) TestLogin() {
 	rd := &ResponseData{}
 	n.Require().Nil(json.NewDecoder(r.Body).Decode(rd))
 
-	n.Require().True(rd.Status, rd.Message)
+	n.Require().True(rd.Success, rd.Message)
 
 	n.Require().NotEmpty(rd.AccessToken, "should send access_token on login")
 }
@@ -115,7 +115,7 @@ func (n *NotesTestSuite) TestCreateNote() {
 	rd := &ResponseData{}
 	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
 
-	n.Require().True(rd.Status, rd.Message)
+	n.Require().True(rd.Success, rd.Message)
 
 	n.Require().Nil(models.GetDB().First(&models.Note{}, "title = ?", title).Error)
 }
@@ -137,7 +137,7 @@ func (n *NotesTestSuite) TestNotesList() {
 
 	rd := &ResponseData{}
 	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
-	n.Require().True(rd.Status, rd.Message)
+	n.Require().True(rd.Success, rd.Message)
 
 	actualTitles := []string{}
 	for _, n := range rd.Notes {
@@ -166,7 +166,7 @@ func (n *NotesTestSuite) TestNoteDetail() {
 
 	rd := &ResponseData{}
 	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
-	n.Require().True(rd.Status, rd.Message)
+	n.Require().True(rd.Success, rd.Message)
 
 	n.Assert().Equal(expectedNote.Title, rd.Note.Title)
 	n.Assert().Equal(expectedNote.Body, rd.Note.Body)
@@ -192,7 +192,7 @@ func (n *NotesTestSuite) TestNoteRemove() {
 
 	rd := &ResponseData{}
 	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
-	n.Require().True(rd.Status, rd.Message)
+	n.Require().True(rd.Success, rd.Message)
 
 	n.Require().NotNil(models.GetDB().First(&models.Note{}, expectedNote.ID).Error)
 }
@@ -224,7 +224,7 @@ func (n *NotesTestSuite) TestNoteUpdate() {
 
 	rd := &ResponseData{}
 	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
-	n.Require().True(rd.Status, rd.Message)
+	n.Require().True(rd.Success, rd.Message)
 
 	models.GetDB().Take(note)
 	n.Require().Equal(expectedBody, note.Body, "body should change")
@@ -295,7 +295,7 @@ func AsJSONBody(obj interface{}) io.Reader {
 type Object map[string]interface{}
 
 type ResponseData struct {
-	Status      bool           `json:"status"`
+	Success     bool           `json:"success"`
 	Message     string         `json:"message"`
 	Notes       []models.Note  `json:"notes"`
 	AccessToken string         `json:"access_token"`

@@ -87,7 +87,6 @@ var GetNotes = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	err := models.GetDB().Model(&models.Note{}).Select("title", "id").Find(notes, "user_id = ?", GetUserID(r)).Error
 	if err != nil {
 		panic("error with db")
-		return
 	}
 	resp := util.ResponseBaseOK()
 	resp["notes"] = notes
@@ -112,7 +111,9 @@ var NoteDetails = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) 
 	} else if err != nil {
 		panic("troubles with db")
 	} else {
-		util.RespondWithJSON(w, 200, util.ResponseBaseOK())
+		resp := util.ResponseBaseOK()
+		resp["note"] = note
+		util.RespondWithJSON(w, 200, resp)
 	}
 })
 

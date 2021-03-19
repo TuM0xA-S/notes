@@ -35,7 +35,6 @@ func (a *Account) Validate() error {
 	if temp.Username != "" {
 		return fmt.Errorf("Username is already in use")
 	}
-
 	return nil
 }
 
@@ -82,4 +81,9 @@ func (a *Account) Login() (string, error) {
 	}
 
 	return GenerateToken(a.ID), nil
+}
+
+// Get user
+func (a *Account) Get() error {
+	return GetDB().Take(a).Error
 }

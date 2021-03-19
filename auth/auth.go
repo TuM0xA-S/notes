@@ -25,17 +25,13 @@ func RequireAuth(hand http.HandlerFunc) http.HandlerFunc {
 		tokenHeader := r.Header.Get("Authorization")
 
 		if tokenHeader == "" {
-			response := util.Message(false, "Missing auth token")
-			w.WriteHeader(http.StatusForbidden)
-			util.Respond(w, response)
+			util.RespondWithError(w, 403, "missing authorization token")
 			return
 		}
 
 		splitted := strings.Fields(tokenHeader)
 		if len(splitted) != 2 {
-			response := util.Message(false, "Invalid/Malformed auth token")
-			w.WriteHeader(http.StatusForbidden)
-			util.Respond(w, response)
+			util.RespondWithError(w, 403, "invalid/malformed auth token")
 			return
 		}
 
@@ -48,16 +44,12 @@ func RequireAuth(hand http.HandlerFunc) http.HandlerFunc {
 			})
 
 		if err != nil {
-			response := util.Message(false, "Invalid/Malformed auth token")
-			w.WriteHeader(http.StatusForbidden)
-			util.Respond(w, response)
+			util.RespondWithError(w, 403, "invalid/malformed auth token")
 			return
 		}
 
 		if !token.Valid {
-			response := util.Message(false, "Token is not valid")
-			w.WriteHeader(http.StatusForbidden)
-			util.Respond(w, response)
+			util.RespondWithError(w, 422, "invalid/malformed auth token")
 			return
 		}
 
