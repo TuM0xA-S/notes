@@ -209,8 +209,7 @@ func (n *NotesTestSuite) TestNoteUpdate() {
 
 	expectedBody := "another body"
 	patchNote := &models.Note{
-		Model: models.Model{ID: note.ID},
-		Body:  expectedBody,
+		Body: expectedBody,
 	}
 
 	client := &http.Client{}
@@ -258,6 +257,7 @@ func (n *NotesTestSuite) TestUnauth() {
 		{"POST", "/api/me/notes/create"},
 		{"GET", "/api/me/notes/1"},
 		{"DELETE", "/api/me/notes/1"},
+		{"PUT", "/api/me/notes/1"},
 		{"GET", "/api/me"},
 	}
 

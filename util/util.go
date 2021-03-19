@@ -5,12 +5,28 @@ import (
 	"net/http"
 )
 
-// Message constructs message object
-func Message(status bool, message string) map[string]interface{} {
-	return map[string]interface{}{"status": status, "message": message}
+// RespondWithJSON ....
+func RespondWithJSON(w http.ResponseWriter, statusCode int, body interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	err := json.NewEncoder(w).Encode(body)
+	if err != nil {
+		panic("internal error") // negroni catch it
+	}
+
 }
 
-// Respond responds with json encoding
-func Respond(w http.ResponseWriter, data interface{}) {
-	json.NewEncoder(w).Encode(data)
+// RespondWithError ...
+func RespondWithError(w http.ResponseWriter, statusCode int, message string) {
+	RespondWithJSON(w, statusCode, ResponseBase(false, message))
+}
+
+// ResponseBase ...
+func ResponseBase(success bool, message string) map[string]interface{} {
+	return map[string]interface{}{"success": success, "message": message}
+}
+
+// ResponseBaseOK ...
+func ResponseBaseOK() map[string]interface{} {
+	return ResponseBase(true, "OK")
 }

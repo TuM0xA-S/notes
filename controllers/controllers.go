@@ -2,30 +2,15 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
 	"notes/auth"
 	"notes/models"
 	"notes/util"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
-
-// MessageFromError ....
-func MessageFromError(err error) map[string]interface{} {
-	res := map[string]interface{}{}
-	res["message"] = "OK"
-	res["status"] = true
-
-	if err != nil {
-		res["message"] = err.Error()
-		res["status"] = false
-	}
-
-	return res
-}
 
 //CreateAccount controller
 func CreateAccount(w http.ResponseWriter, r *http.Request) {
@@ -33,13 +18,19 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(a); err != nil {
-		log.Println(err, a)
-		util.Respond(w, util.Message(false, "Invalid request"))
+		util.RespondWithError(w, 400, "invalid request")
 		return
 	}
 
 	err := a.Create()
-	util.Respond(w, MessageFromError(err))
+
+	if err != nil {
+		util.RespondWithError(w, 422, err.Error())
+		return
+	}
+
+	util.RespondWithJSON(w, 200, util.ResponseBaseOK())
+
 }
 
 // GetUserID from request
@@ -53,31 +44,41 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(a); err != nil {
-		util.Respond(w, util.Message(false, "Invalide request"))
+		util.RespondWithError(w, 400, "invalid request")
 		return
 	}
 
 	accessToken, err := a.Login()
-	resp := MessageFromError(err)
-	if err == nil {
-		resp["access_token"] = accessToken
+	if err != nil {
+		util.RespondWithError(w, 422, err.Error())
+		return
 	}
-	util.Respond(w, resp)
+
+	resp := util.ResponseBaseOK()
+	resp["access_token"] = accessToken
+	util.RespondWithJSON(w, 200, resp)
 }
 
 //CreateNote for user controller
 var CreateNote = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	note := &models.Note{}
+
 	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(note); err != nil {
-		resp := util.Message(false, "Invalid request")
-		util.Respond(w, resp)
+		util.RespondWithError(w, 400, "body cannot be used for create")
 		return
 	}
 
 	note.UserID = GetUserID(r)
 	err := note.Create()
-	util.Respond(w, MessageFromError(err))
+
+	// idk how to manage error properly here
+	if err != nil {
+		util.RespondWithError(w, 400, err.Error())
+		return
+	}
+
+	util.RespondWithJSON(w, 200, util.ResponseBaseOK())
 })
 
 //GetNotes for user controller
@@ -85,72 +86,81 @@ var GetNotes = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	notes := &[]map[string]interface{}{}
 	err := models.GetDB().Model(&models.Note{}).Select("title", "id").Find(notes, "user_id = ?", GetUserID(r)).Error
 	if err != nil {
-		util.Respond(w, util.Message(false, "error with db"))
+		panic("error with db")
 		return
 	}
-	resp := util.Message(true, "OK")
+	resp := util.ResponseBaseOK()
 	resp["notes"] = notes
 
-	util.Respond(w, resp)
+	util.RespondWithJSON(w, 200, resp)
 })
 
 //NoteDetails ....
 var NoteDetails = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserID(r)
-	noteID, _ := strconv.Atoi(mux.Vars(r)["note_id"])
+	var noteID uint
+	fmt.Sscan(mux.Vars(r)["note_id"], &noteID)
 
 	note := &models.Note{}
-	err := models.GetDB().First(note, "id = ? and user_id = ?", noteID, userID).Error
+	note.ID = noteID
+	note.UserID = userID
+
+	err := note.Get()
+
 	if err == gorm.ErrRecordNotFound {
-		util.Respond(w, util.Message(false, "no such note"))
+		util.RespondWithError(w, 404, "no such note")
 	} else if err != nil {
-		util.Respond(w, util.Message(false, "error with db"))
+		panic("troubles with db")
 	} else {
-		resp := util.Message(true, "OK")
-		resp["note"] = note
-		util.Respond(w, resp)
+		util.RespondWithJSON(w, 200, util.ResponseBaseOK())
 	}
 })
 
 //NoteRemove ....
 var NoteRemove = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserID(r)
-	noteID, _ := strconv.Atoi(mux.Vars(r)["note_id"])
+	var noteID uint
+	fmt.Sscan(mux.Vars(r)["note_id"], &noteID)
 
 	note := &models.Note{}
-	err := models.GetDB().First(note, "id = ? and user_id = ?", noteID, userID).Error
+	note.ID = noteID
+	note.UserID = userID
+
+	err := note.Remove()
+
 	if err == gorm.ErrRecordNotFound {
-		util.Respond(w, util.Message(false, "no such note"))
+		util.RespondWithError(w, 404, "no such note")
 	} else if err != nil {
-		util.Respond(w, util.Message(false, "error with db"))
+		panic("troubles with db")
 	} else {
-		models.GetDB().Delete(note)
-		resp := util.Message(true, "OK")
-		util.Respond(w, resp)
+		util.RespondWithJSON(w, 200, util.ResponseBaseOK())
 	}
 })
 
 //NoteUpdate ....
 var NoteUpdate = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserID(r)
-	noteID, _ := strconv.Atoi(mux.Vars(r)["note_id"])
+	var noteID uint
+	fmt.Sscan(mux.Vars(r)["note_id"], &noteID)
 
 	note := &models.Note{}
-	err := models.GetDB().First(note, "id = ? and user_id = ?", noteID, userID).Error
+	note.ID = noteID
+	note.UserID = userID
+	patch := &models.Note{}
+	defer r.Body.Close()
+	if err := json.NewDecoder(r.Body).Decode(patch); err != nil {
+		util.RespondWithError(w, 400, "invalid request")
+		return
+	}
+
+	err := note.Update(patch)
+
 	if err == gorm.ErrRecordNotFound {
-		util.Respond(w, util.Message(false, "no such note"))
+		util.RespondWithError(w, 404, "no such note")
 	} else if err != nil {
-		util.Respond(w, util.Message(false, "error with db"))
+		panic("troubles with db")
 	} else {
-		patch := &models.Note{}
-		if err := json.NewDecoder(r.Body).Decode(patch); err != nil {
-			resp := util.Message(false, "invalid request")
-			util.Respond(w, resp)
-			return
-		}
-		models.GetDB().Model(note).Updates(patch)
-		resp := util.Message(true, "OK")
-		util.Respond(w, resp)
+		util.RespondWithJSON(w, 200, util.ResponseBaseOK())
 	}
 })
 
@@ -158,9 +168,12 @@ var NoteUpdate = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 var UserDetails = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserID(r)
 	user := &models.Account{}
-	models.GetDB().Take(user, userID)
-	resp := util.Message(true, "OK")
+	user.ID = userID
+	if err := user.Get(); err != nil {
+		panic("user should always be valid because of authorization")
+	}
 	user.Password = "<hashed>"
+	resp := util.ResponseBaseOK()
 	resp["user"] = user
-	util.Respond(w, resp)
+	util.RespondWithJSON(w, 200, resp)
 })
