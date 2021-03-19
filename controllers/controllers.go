@@ -83,10 +83,11 @@ var CreateNote = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 
 //NotesList for user controller
 var NotesList = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
-	notes := &[]map[string]interface{}{}
-	err := models.GetDB().Model(&models.Note{}).Select("title", "id").Find(notes, "user_id = ?", GetUserID(r)).Error
+	query := models.GetDB().Model(&models.Note{}).Select("title", "id").Where("user_id = ?", GetUserID(r)).Order("updated_at DESC")
+	page := GetPage(r)
+	notes, err := Page(query, page)
 	if err != nil {
-		panic("error with db")
+		panic(err)
 	}
 	resp := util.ResponseBaseOK()
 	resp["notes"] = notes
@@ -96,10 +97,11 @@ var NotesList = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 
 //PublishedNotesList ...
 var PublishedNotesList = func(w http.ResponseWriter, r *http.Request) {
-	notes := &[]map[string]interface{}{}
-	err := models.GetDB().Model(&models.Note{}).Select("title", "id").Find(notes, "published").Error
+	query := models.GetDB().Model(&models.Note{}).Select("title", "id").Where("published").Order("updated_at DESC")
+	page := GetPage(r)
+	notes, err := Page(query, page)
 	if err != nil {
-		panic("error with db")
+		panic(err)
 	}
 	resp := util.ResponseBaseOK()
 	resp["notes"] = notes

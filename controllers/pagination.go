@@ -2,7 +2,8 @@ package controllers
 
 import (
 	"fmt"
-	"notes/models"
+	"net/http"
+	"strconv"
 
 	. "notes/config"
 
@@ -10,8 +11,8 @@ import (
 )
 
 // Page return certain page of notes
-func Page(notes *gorm.DB, page int) ([]models.Note, error) {
-	res := []models.Note{}
+func Page(notes *gorm.DB, page int) ([]map[string]interface{}, error) {
+	res := []map[string]interface{}{}
 	err := notes.Offset((page - 1) * Cfg.PerPage).Limit(Cfg.PerPage).Find(&res).Error
 	if err != nil {
 		return nil, fmt.Errorf("when fetching page: %v", err)
@@ -27,4 +28,15 @@ func PaginationData(cur, total int) map[string]int {
 		"per_page":     Cfg.PerPage,
 	}
 	return pag
+}
+
+// GetPage extracts page from request
+func GetPage(r *http.Request) int {
+	pageStr := r.URL.Query().Get("page")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		page = 1
+	}
+
+	return page
 }

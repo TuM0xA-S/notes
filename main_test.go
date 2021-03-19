@@ -10,6 +10,8 @@ import (
 	"notes/models"
 	"testing"
 
+	. "notes/config"
+
 	"github.com/stretchr/testify/suite"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -284,6 +286,31 @@ func (n *NotesTestSuite) TestUserDetail() {
 
 	n.Assert().Equal(user.Username, rd.User.Username)
 	n.Assert().Equal("<hashed>", rd.User.Password)
+}
+
+func (n *NotesTestSuite) TestPagination() {
+	user := CreateUserTest()
+	for cnt := 0; cnt < Cfg.PerPage+1; cnt++ {
+		models.GetDB().Create(&models.Note{UserID: user.ID, Title: fmt.Sprintf("title %d", cnt)})
+	}
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("GET", n.ts.URL+"/api/me/notes?page=2", nil)
+	AuthorizeRequest(req, user)
+
+	resp := Must(client.Do(req))
+	n.Require().Equal(200, resp.StatusCode)
+
+	rd := &ResponseData{}
+	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
+	n.Require().True(rd.Success, rd.Message)
+
+	actualTitles := []string{}
+	for _, n := range rd.Notes {
+		actualTitles = append(actualTitles, n.Title)
+	}
+
+	n.Require().ElementsMatch(actualTitles, []string{"title 0"})
 }
 
 func (n *NotesTestSuite) TestUnauth() {
