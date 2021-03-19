@@ -3,7 +3,7 @@ useless, but production ready(?)
 
 ### features
 * jwt authentification
-* nice test organisation
+* ~~nice test organisation~~(just tests)
 * model/controller separation
 * cool docker image(settings in .env file)
 
@@ -23,6 +23,7 @@ published notes | `GET /api/notes`
 * to regiser/login provide `username` and `password`
 * `title` and `body` to create note
 * note can be published by setting `published` field to `true`
+* `page` query parameter can for specify page
 
 ### tasks
 * [x] api base
