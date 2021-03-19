@@ -15,8 +15,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func UserTest() *models.Account {
-	return &models.Account{
+func UserTest() *models.User {
+	return &models.User{
 		Username: "tum0xa",
 		Password: "secret123",
 	}
@@ -30,7 +30,7 @@ func UserBodyDataTest() io.Reader {
 	})
 }
 
-func CreateUserTest() *models.Account {
+func CreateUserTest() *models.User {
 	user := UserTest()
 	user.Create()
 	return user
@@ -79,7 +79,7 @@ func (n *NotesTestSuite) TestCreateUser() {
 
 	user := UserTest()
 
-	n.Require().Nil(models.GetDB().First(&models.Account{}, "username = ?", user.Username).Error)
+	n.Require().Nil(models.GetDB().First(&models.User{}, "username = ?", user.Username).Error)
 }
 
 func (n *NotesTestSuite) TestLogin() {
@@ -96,7 +96,7 @@ func (n *NotesTestSuite) TestLogin() {
 	n.Require().NotEmpty(rd.AccessToken, "should send access_token on login")
 }
 
-func AuthorizeRequest(req *http.Request, user *models.Account) {
+func AuthorizeRequest(req *http.Request, user *models.User) {
 	req.Header.Add("Authorization", "Bearer "+models.GenerateToken(user.ID))
 }
 
@@ -300,5 +300,5 @@ type ResponseData struct {
 	Notes       []models.Note  `json:"notes"`
 	AccessToken string         `json:"access_token"`
 	Note        models.Note    `json:"note"`
-	User        models.Account `json:"user"`
+	User        models.User `json:"user"`
 }

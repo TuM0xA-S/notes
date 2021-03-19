@@ -10,15 +10,15 @@ import (
 	"gorm.io/gorm"
 )
 
-//Account model
-type Account struct {
+//User model
+type User struct {
 	Model
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
 //Validate validates account data
-func (a *Account) Validate() error {
+func (a *User) Validate() error {
 	if len(a.Username) < 4 || len(a.Username) > 20 {
 		return fmt.Errorf("Username is required(4 <= len <= 20)")
 	}
@@ -27,8 +27,8 @@ func (a *Account) Validate() error {
 		return fmt.Errorf("Password is required(6 <= len <= 30)")
 	}
 
-	temp := &Account{}
-	err := GetDB().Table("accounts").Where("username = ?", a.Username).First(temp).Error
+	temp := &User{}
+	err := GetDB().Where("username = ?", a.Username).First(temp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return fmt.Errorf("Connection error. Please retry")
 	}
@@ -46,7 +46,7 @@ func HashPassword(password string) string {
 }
 
 //Create account in db
-func (a *Account) Create() error {
+func (a *User) Create() error {
 	if err := a.Validate(); err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func GenerateToken(uid uint) string {
 }
 
 //Login user
-func (a *Account) Login() (string, error) {
+func (a *User) Login() (string, error) {
 	password := a.Password
 	if err := GetDB().Where("username = ?", a.Username).First(a).Error; err == gorm.ErrRecordNotFound {
 		return "", fmt.Errorf("Username not found")
@@ -84,6 +84,6 @@ func (a *Account) Login() (string, error) {
 }
 
 // Get user
-func (a *Account) Get() error {
+func (a *User) Get() error {
 	return GetDB().Take(a).Error
 }

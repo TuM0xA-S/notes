@@ -16,7 +16,7 @@ func Init(conn *gorm.DB) {
 	db = conn
 }
 
-var activeModels = []interface{}{&Account{}, &Note{}}
+var activeModels = []interface{}{&User{}, &Note{}}
 
 // Migrate ...
 func Migrate() {

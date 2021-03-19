@@ -14,7 +14,7 @@ import (
 
 //CreateAccount controller
 func CreateAccount(w http.ResponseWriter, r *http.Request) {
-	a := &models.Account{}
+	a := &models.User{}
 
 	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(a); err != nil {
@@ -40,7 +40,7 @@ func GetUserID(req *http.Request) uint {
 
 //Login controller
 func Login(w http.ResponseWriter, r *http.Request) {
-	a := &models.Account{}
+	a := &models.User{}
 
 	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(a); err != nil {
@@ -168,7 +168,7 @@ var NoteUpdate = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 //UserDetails ....
 var UserDetails = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserID(r)
-	user := &models.Account{}
+	user := &models.User{}
 	user.ID = userID
 	if err := user.Get(); err != nil {
 		panic("user should always be valid because of authorization")
