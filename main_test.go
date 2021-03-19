@@ -182,7 +182,7 @@ func (n *NotesTestSuite) TestNoteRemove() {
 
 	client := &http.Client{}
 
-	req, _ := http.NewRequest("POST", fmt.Sprintf(n.ts.URL+"/api/me/notes/%d/remove", expectedNote.ID), nil)
+	req, _ := http.NewRequest("DELETE", fmt.Sprintf(n.ts.URL+"/api/me/notes/%d", expectedNote.ID), nil)
 	AuthorizeRequest(req, user)
 
 	resp := Must(client.Do(req))
@@ -219,7 +219,7 @@ func (n *NotesTestSuite) TestUnauth() {
 		{"GET", "/api/me/notes"},
 		{"POST", "/api/me/notes/create"},
 		{"GET", "/api/me/notes/1"},
-		{"POST", "/api/me/notes/1/remove"},
+		{"DELETE", "/api/me/notes/1"},
 		{"GET", "/api/me"},
 	}
 
