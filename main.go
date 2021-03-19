@@ -25,6 +25,7 @@ func GetRouter() http.Handler {
 	router.HandleFunc("/api/me/notes/create", controllers.CreateNote).Methods("POST")
 	router.HandleFunc("/api/me/notes/{note_id:[0-9]+}", controllers.NoteDetails).Methods("GET")
 	router.HandleFunc("/api/me/notes/{note_id:[0-9]+}", controllers.NoteRemove).Methods("DELETE")
+	router.HandleFunc("/api/me/notes/{note_id:[0-9]+}", controllers.NoteUpdate).Methods("PUT")
 	router.HandleFunc("/api/me", controllers.UserDetails).Methods("GET")
 
 	n := negroni.New(negroni.NewRecovery(), negroni.NewLogger())

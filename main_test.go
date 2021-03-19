@@ -137,6 +137,7 @@ func (n *NotesTestSuite) TestNotesList() {
 
 	rd := &ResponseData{}
 	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
+	n.Require().True(rd.Status, rd.Message)
 
 	actualTitles := []string{}
 	for _, n := range rd.Notes {
@@ -165,6 +166,7 @@ func (n *NotesTestSuite) TestNoteDetail() {
 
 	rd := &ResponseData{}
 	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
+	n.Require().True(rd.Status, rd.Message)
 
 	n.Assert().Equal(expectedNote.Title, rd.Note.Title)
 	n.Assert().Equal(expectedNote.Body, rd.Note.Body)
@@ -190,8 +192,44 @@ func (n *NotesTestSuite) TestNoteRemove() {
 
 	rd := &ResponseData{}
 	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
+	n.Require().True(rd.Status, rd.Message)
 
 	n.Require().NotNil(models.GetDB().First(&models.Note{}, expectedNote.ID).Error)
+}
+
+func (n *NotesTestSuite) TestNoteUpdate() {
+	user := CreateUserTest()
+	expectedTitle := "wow nice title bruh"
+	note := &models.Note{
+		Title:  expectedTitle,
+		Body:   "text text text text text",
+		UserID: user.ID,
+	}
+	note.Create()
+
+	expectedBody := "another body"
+	patchNote := &models.Note{
+		Model: models.Model{ID: note.ID},
+		Body:  expectedBody,
+	}
+
+	client := &http.Client{}
+
+	b := &bytes.Buffer{}
+	json.NewEncoder(b).Encode(patchNote)
+	req, _ := http.NewRequest("PUT", fmt.Sprintf(n.ts.URL+"/api/me/notes/%d", note.ID), b)
+	AuthorizeRequest(req, user)
+
+	resp := Must(client.Do(req))
+	n.Require().Equal(200, resp.StatusCode)
+
+	rd := &ResponseData{}
+	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
+	n.Require().True(rd.Status, rd.Message)
+
+	models.GetDB().Take(note)
+	n.Require().Equal(expectedBody, note.Body, "body should change")
+	n.Require().Equal(expectedTitle, note.Title, "title should not change")
 }
 
 func (n *NotesTestSuite) TestUserDetail() {

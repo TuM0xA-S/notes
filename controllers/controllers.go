@@ -130,6 +130,30 @@ var NoteRemove = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	}
 })
 
+//NoteUpdate ....
+var NoteUpdate = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
+	userID := GetUserID(r)
+	noteID, _ := strconv.Atoi(mux.Vars(r)["note_id"])
+
+	note := &models.Note{}
+	err := models.GetDB().First(note, "id = ? and user_id = ?", noteID, userID).Error
+	if err == gorm.ErrRecordNotFound {
+		util.Respond(w, util.Message(false, "no such note"))
+	} else if err != nil {
+		util.Respond(w, util.Message(false, "error with db"))
+	} else {
+		patch := &models.Note{}
+		if err := json.NewDecoder(r.Body).Decode(patch); err != nil {
+			resp := util.Message(false, "invalid request")
+			util.Respond(w, resp)
+			return
+		}
+		models.GetDB().Model(note).Updates(patch)
+		resp := util.Message(true, "OK")
+		util.Respond(w, resp)
+	}
+})
+
 //UserDetails ....
 var UserDetails = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserID(r)
