@@ -7,9 +7,10 @@ import (
 //Note with title, body and ownwer
 type Note struct {
 	Model
-	Title  string `json:"title"`
-	Body   string `json:"body"`
-	UserID uint   `json:"user_id"`
+	Title     string `json:"title"`
+	Body      string `json:"body"`
+	UserID    uint   `json:"user_id"`
+	Published bool   `json:"published"`
 }
 
 //Validate note

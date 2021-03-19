@@ -147,6 +147,32 @@ func (n *NotesTestSuite) TestNotesList() {
 	n.Require().ElementsMatch(actualTitles, expectedTitles)
 }
 
+func (n *NotesTestSuite) TestPublishedNotesList() {
+	user := CreateUserTest()
+	expectedTitles := []string{"title 1", "title 2", "another stuff"}
+	for _, title := range expectedTitles {
+		models.GetDB().Create(&models.Note{Title: title, UserID: user.ID})
+	}
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("GET", n.ts.URL+"/api/me/notes", nil)
+	AuthorizeRequest(req, user)
+
+	resp := Must(client.Do(req))
+	n.Require().Equal(200, resp.StatusCode)
+
+	rd := &ResponseData{}
+	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
+	n.Require().True(rd.Success, rd.Message)
+
+	actualTitles := []string{}
+	for _, n := range rd.Notes {
+		actualTitles = append(actualTitles, n.Title)
+	}
+
+	n.Require().ElementsMatch(actualTitles, expectedTitles)
+}
 func (n *NotesTestSuite) TestNoteDetail() {
 	user := CreateUserTest()
 	expectedNote := &models.Note{
