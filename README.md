@@ -24,7 +24,7 @@ published notes | `GET /api/notes`
 * `title` and `body` to create note
 * note can be published by setting `published` field to `true`
 
-tasks
+### tasks
 * [x] api base
 * [ ] pagination
 * [ ] filters

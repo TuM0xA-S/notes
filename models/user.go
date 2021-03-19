@@ -86,5 +86,5 @@ func (a *User) Login() (string, error) {
 
 // Get user
 func (a *User) Get() error {
-	return GetDB().Take(a).Error
+	return GetDB().Take(a, a.ID).Error
 }
