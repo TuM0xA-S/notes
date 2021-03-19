@@ -313,6 +313,25 @@ func (n *NotesTestSuite) TestPagination() {
 	n.Require().ElementsMatch(actualTitles, []string{"title 0"})
 }
 
+func (n *NotesTestSuite) TestNotePublishedDetail() {
+	user := CreateUserTest()
+	note := &models.Note{
+		Title:     "not matters",
+		UserID:    user.ID,
+		Published: true,
+	}
+	note.Create()
+
+	resp := Must(http.Get(fmt.Sprintf(n.ts.URL+"/api/notes/%v", note.ID)))
+	n.Require().Equal(200, resp.StatusCode)
+
+	note.Published = false
+	note.Save()
+
+	resp = Must(http.Get(fmt.Sprintf(n.ts.URL+"/api/notes/%v", note.ID)))
+	n.Require().Equal(404, resp.StatusCode)
+}
+
 func (n *NotesTestSuite) TestUnauth() {
 	qs := []struct {
 		method, url string

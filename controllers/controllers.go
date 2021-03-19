@@ -109,6 +109,23 @@ var PublishedNotesList = func(w http.ResponseWriter, r *http.Request) {
 	util.RespondWithJSON(w, 200, resp)
 }
 
+// PublishedNoteDetail ...
+func PublishedNoteDetail(w http.ResponseWriter, r *http.Request) {
+	var noteID uint
+	fmt.Sscan(mux.Vars(r)["note_id"], &noteID)
+	note := &models.Note{Model: models.Model{ID: noteID}, Published: true}
+	err := note.Get()
+	if err == gorm.ErrRecordNotFound {
+		util.RespondWithError(w, 404, "no such note")
+	} else if err != nil {
+		panic(err)
+	}
+	resp := util.ResponseBaseOK()
+	resp["note"] = note
+
+	util.RespondWithJSON(w, 200, resp)
+}
+
 //NoteDetails ....
 var NoteDetails = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserID(r)

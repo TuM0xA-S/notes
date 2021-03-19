@@ -8,25 +8,28 @@ useless, but production ready(?)
 * cool docker image(settings in .env file)
 
 ### api
-action          | request
---------------- | ---------------
-create user		| `POST /api/user/create`
-login	    	| `POST /api/user/login`
-notes list  	| `GET /api/me/notes`
-create note 	| `POST /api/me/notes/create`
-note detail 	| `GET /api/me/notes/{note_id}`
-update note 	| `PUT /api/me/notes/{note_id}`
-remove note 	| `DELETE /api/me/notes/{note_id}`
-user detail 	| `GET /api/me`
-published notes | `GET /api/notes`
+action              | request
+------------------- | ---------------
+create user		    | `POST /api/user/create`
+login	    	    | `POST /api/user/login`
+notes list  	    | `GET /api/me/notes`
+create note 	    | `POST /api/me/notes/create`
+note detail(yours)  | `GET /api/me/notes/{note_id}`
+update note 	    | `PUT /api/me/notes/{note_id}`
+remove note 	    | `DELETE /api/me/notes/{note_id}`
+user detail 	    | `GET /api/me`
+published notes     | `GET /api/notes`
+note detail(public) | `GET /api/notes/{note_id}`
 
 * to regiser/login provide `username` and `password`
 * `title` and `body` to create note
 * note can be published by setting `published` field to `true`
-* `page` query parameter can for specify page
+* `page` query parameter for specifying page
 
 ### tasks
-* [ ] api base(cannot get published note)
+* [x] api base
 * [x] pagination
 * [ ] filters
+* [ ] rework error handling
+* [ ] reorganize tests
 

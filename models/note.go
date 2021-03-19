@@ -47,6 +47,11 @@ func (n *Note) Get() error {
 	return GetDB().Where(n).Take(n).Error
 }
 
+//Save note
+func (n *Note) Save() error {
+	return GetDB().Save(n).Error
+}
+
 //Remove note
 func (n *Note) Remove() error {
 	return GetDB().Where(n).Delete(n).Error
