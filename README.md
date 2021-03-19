@@ -8,8 +8,8 @@ useless, but production ready(?)
 * cool docker image(settings in .env file)
 
 ### api
-action      | request
------------ | ---------------
+action          | request
+--------------- | ---------------
 create user		| `POST /api/user/create`
 login	    	| `POST /api/user/login`
 notes list  	| `GET /api/me/notes`
@@ -26,7 +26,7 @@ published notes | `GET /api/notes`
 * `page` query parameter can for specify page
 
 ### tasks
-* [x] api base
-* [ ] pagination
+* [ ] api base(cannot get published note)
+* [x] pagination
 * [ ] filters
 
