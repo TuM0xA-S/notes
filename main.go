@@ -19,9 +19,10 @@ import (
 func GetRouter() http.Handler {
 	router := mux.NewRouter()
 	router.Use(jsonMiddleware)
+	router.HandleFunc("/api/notes", controllers.PublishedNotesList).Methods("GET")
 	router.HandleFunc("/api/user/create", controllers.CreateAccount).Methods("POST")
 	router.HandleFunc("/api/user/login", controllers.Login).Methods("POST")
-	router.HandleFunc("/api/me/notes", controllers.GetNotes).Methods("GET")
+	router.HandleFunc("/api/me/notes", controllers.NotesList).Methods("GET")
 	router.HandleFunc("/api/me/notes/create", controllers.CreateNote).Methods("POST")
 	router.HandleFunc("/api/me/notes/{note_id:[0-9]+}", controllers.NoteDetails).Methods("GET")
 	router.HandleFunc("/api/me/notes/{note_id:[0-9]+}", controllers.NoteRemove).Methods("DELETE")

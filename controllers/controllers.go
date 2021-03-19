@@ -81,8 +81,8 @@ var CreateNote = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	util.RespondWithJSON(w, 200, util.ResponseBaseOK())
 })
 
-//GetNotes for user controller
-var GetNotes = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
+//NotesList for user controller
+var NotesList = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	notes := &[]map[string]interface{}{}
 	err := models.GetDB().Model(&models.Note{}).Select("title", "id").Find(notes, "user_id = ?", GetUserID(r)).Error
 	if err != nil {
@@ -93,6 +93,19 @@ var GetNotes = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 
 	util.RespondWithJSON(w, 200, resp)
 })
+
+//PublishedNotesList ...
+var PublishedNotesList = func(w http.ResponseWriter, r *http.Request) {
+	notes := &[]map[string]interface{}{}
+	err := models.GetDB().Model(&models.Note{}).Select("title", "id").Find(notes, "published").Error
+	if err != nil {
+		panic("error with db")
+	}
+	resp := util.ResponseBaseOK()
+	resp["notes"] = notes
+
+	util.RespondWithJSON(w, 200, resp)
+}
 
 //NoteDetails ....
 var NoteDetails = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {

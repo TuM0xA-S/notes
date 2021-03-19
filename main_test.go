@@ -148,18 +148,28 @@ func (n *NotesTestSuite) TestNotesList() {
 }
 
 func (n *NotesTestSuite) TestPublishedNotesList() {
-	user := CreateUserTest()
-	expectedTitles := []string{"title 1", "title 2", "another stuff"}
-	for _, title := range expectedTitles {
-		models.GetDB().Create(&models.Note{Title: title, UserID: user.ID})
+	user1 := &models.User{
+		Username: "user1",
+		Password: "password",
+		Notes: []models.Note{
+			{Title: "title 1", Published: true},
+			{Title: "title not published"},
+		},
 	}
+	user1.Create()
 
-	client := &http.Client{}
+	user2 := &models.User{
+		Username: "user2",
+		Password: "password",
+		Notes: []models.Note{
+			{Title: "title 2", Published: true},
+		},
+	}
+	user2.Create()
 
-	req, _ := http.NewRequest("GET", n.ts.URL+"/api/me/notes", nil)
-	AuthorizeRequest(req, user)
+	expectedTitles := []string{"title 1", "title 2"}
 
-	resp := Must(client.Do(req))
+	resp := Must(http.Get(n.ts.URL + "/api/notes"))
 	n.Require().Equal(200, resp.StatusCode)
 
 	rd := &ResponseData{}
@@ -173,6 +183,7 @@ func (n *NotesTestSuite) TestPublishedNotesList() {
 
 	n.Require().ElementsMatch(actualTitles, expectedTitles)
 }
+
 func (n *NotesTestSuite) TestNoteDetail() {
 	user := CreateUserTest()
 	expectedNote := &models.Note{
@@ -321,10 +332,10 @@ func AsJSONBody(obj interface{}) io.Reader {
 type Object map[string]interface{}
 
 type ResponseData struct {
-	Success     bool           `json:"success"`
-	Message     string         `json:"message"`
-	Notes       []models.Note  `json:"notes"`
-	AccessToken string         `json:"access_token"`
-	Note        models.Note    `json:"note"`
-	User        models.User `json:"user"`
+	Success     bool          `json:"success"`
+	Message     string        `json:"message"`
+	Notes       []models.Note `json:"notes"`
+	AccessToken string        `json:"access_token"`
+	Note        models.Note   `json:"note"`
+	User        models.User   `json:"user"`
 }
