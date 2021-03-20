@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"notes/controllers"
 	"notes/models"
+	"notes/util"
+	"os"
 
 	. "notes/config"
 
@@ -15,10 +17,17 @@ import (
 	"gorm.io/gorm"
 )
 
+//FormatPanicError just responds with json
+func (i InternalServerErrorResponder) FormatPanicError(rw http.ResponseWriter, _ *http.Request, _ *negroni.PanicInformation) {
+	util.RespondWithError(rw, 500, "server internal error")
+}
+
+//InternalServerErrorResponder [lol i hate suppressing that warning messages]
+type InternalServerErrorResponder struct{}
+
 // GetRouter returns prepared router
 func GetRouter() http.Handler {
 	router := mux.NewRouter()
-	router.Use(jsonMiddleware)
 	router.HandleFunc("/api/notes", controllers.PublishedNotesList).Methods("GET")
 	router.HandleFunc("/api/user/create", controllers.CreateAccount).Methods("POST")
 	router.HandleFunc("/api/user/login", controllers.Login).Methods("POST")
@@ -30,16 +39,22 @@ func GetRouter() http.Handler {
 	router.HandleFunc("/api/me", controllers.UserDetails).Methods("GET")
 	router.HandleFunc("/api/notes/{note_id:[0-9]+}", controllers.PublishedNoteDetail).Methods("GET")
 
-	n := negroni.New(negroni.NewRecovery(), negroni.NewLogger())
-	n.UseHandler(router)
-	return n
-}
+	n := negroni.New()
 
-func jsonMiddleware(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		h.ServeHTTP(w, r)
-	})
+	logger := log.New(os.Stdout, "[notes]", 0)
+
+	loggerMid := negroni.NewLogger()
+	loggerMid.ALogger = logger
+	n.Use(loggerMid)
+
+	recoverMid := negroni.NewRecovery()
+	recoverMid.Logger = logger
+	recoverMid.Formatter = InternalServerErrorResponder{}
+	n.Use(recoverMid)
+
+	n.UseHandler(router)
+
+	return n
 }
 
 func main() {

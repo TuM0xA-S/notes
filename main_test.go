@@ -51,10 +51,12 @@ type NotesTestSuite struct {
 }
 
 func (n *NotesTestSuite) SetupSuite() {
+	n.ts = httptest.NewServer(GetRouter())
+}
+
+func (n *NotesTestSuite) SetupTest() {
 	conn, err := gorm.Open(sqlite.Open(":memory:"))
 	n.Require().Nil(err, "test db should work")
-
-	n.ts = httptest.NewServer(GetRouter())
 
 	models.Init(conn)
 	models.Migrate()
@@ -355,6 +357,29 @@ func (n *NotesTestSuite) TestUnauth() {
 func (n *NotesTestSuite) TestUnauthContentType() {
 	resp := Must(http.Get(n.ts.URL + "/api/me"))
 	n.Require().Equal("application/json", resp.Header.Get("Content-Type"))
+}
+
+func (n *NotesTestSuite) TestBrokenDB() {
+	user := CreateUserTest()
+	note := &models.Note{
+		Title:     "not matters",
+		UserID:    user.ID,
+		Published: true,
+	}
+	note.Create()
+
+	// break db
+	db, err := models.GetDB().DB()
+	n.Require().Nil(err)
+	db.Close()
+
+	resp := Must(http.Get(fmt.Sprintf(n.ts.URL+"/api/notes/%v", note.ID)))
+	n.Require().Equal(500, resp.StatusCode)
+
+	rd := &ResponseData{}
+	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd), "server should serve with valid json anyway")
+	n.Require().False(rd.Success)
+	n.Require().NotEmpty(rd.Message)
 }
 
 func TestNotesTestSuite(t *testing.T) {
