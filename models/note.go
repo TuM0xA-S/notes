@@ -16,14 +16,14 @@ type Note struct {
 //Validate note
 func (n *Note) Validate() error {
 	if len(n.Title) < 3 || len(n.Title) > 40 {
-		return fmt.Errorf("Validation error. Title len should be (3 <= len <= 40)")
+		return ErrValidation("Validation error. Title len should be (3 <= len <= 40)")
 	}
 	if len(n.Body) > 512 {
-		return fmt.Errorf("Validation error. Body is too big(max len 512)")
+		return ErrValidation("Validation error. Body is too big(max len 512)")
 	}
 
 	if n.UserID <= 0 {
-		return fmt.Errorf("Validation error. UserID is invalid")
+		return ErrValidation("Validation error. UserID is invalid")
 	}
 
 	return nil
@@ -35,8 +35,8 @@ func (n *Note) Create() error {
 		return err
 	}
 
-	if GetDB().Create(n).Error != nil {
-		return fmt.Errorf("Failed to create")
+	if err := GetDB().Create(n).Error; err != nil {
+		panic(fmt.Errorf("when creating in db: %v", err))
 	}
 
 	return nil

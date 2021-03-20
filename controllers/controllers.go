@@ -24,9 +24,11 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 
 	err := a.Create()
 
-	if err != nil {
+	if models.IsErrValidation(err) {
 		util.RespondWithError(w, 422, err.Error())
 		return
+	} else if err != nil {
+		panic(err)
 	}
 
 	util.RespondWithJSON(w, 200, util.ResponseBaseOK())
@@ -49,9 +51,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	accessToken, err := a.Login()
-	if err != nil {
+	if models.IsErrValidation(err) {
 		util.RespondWithError(w, 422, err.Error())
 		return
+	} else if err != nil {
+		panic(err)
 	}
 
 	resp := util.ResponseBaseOK()
@@ -71,11 +75,11 @@ var CreateNote = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 
 	note.UserID = GetUserID(r)
 	err := note.Create()
-
-	// idk how to manage error properly here
-	if err != nil {
-		util.RespondWithError(w, 400, err.Error())
+	if models.IsErrValidation(err) {
+		util.RespondWithError(w, 422, err.Error())
 		return
+	} else if err != nil {
+		panic(err)
 	}
 
 	util.RespondWithJSON(w, 200, util.ResponseBaseOK())
@@ -141,7 +145,7 @@ var NoteDetails = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) 
 	if err == gorm.ErrRecordNotFound {
 		util.RespondWithError(w, 404, "no such note")
 	} else if err != nil {
-		panic("troubles with db")
+		panic(err)
 	} else {
 		resp := util.ResponseBaseOK()
 		resp["note"] = note

@@ -18,25 +18,25 @@ type User struct {
 	Notes    []Note `json:"-"`
 }
 
-//Validate validates account data
+//Validate validates account data(can it be created?)
 func (a *User) Validate() error {
 	if len(a.Username) < 4 || len(a.Username) > 20 {
-		return fmt.Errorf("Username is required(4 <= len <= 20)")
+		return ErrValidation("Username is required(4 <= len <= 20)")
 	}
 
 	if len(a.Password) < 6 || len(a.Password) > 30 {
-		return fmt.Errorf("Password is required(6 <= len <= 30)")
+		return ErrValidation("Password is required(6 <= len <= 30)")
 	}
 
-	temp := &User{}
-	err := GetDB().Where("username = ?", a.Username).First(temp).Error
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return fmt.Errorf("Connection error. Please retry")
+	err := GetDB().Where("username = ?", a.Username).First(&User{}).Error
+	switch err {
+	case gorm.ErrRecordNotFound:
+		return nil
+	case nil:
+		return ErrValidation("Username is already in use")
+	default:
+		panic(fmt.Errorf("when fetching from db: %v", err))
 	}
-	if temp.Username != "" {
-		return fmt.Errorf("Username is already in use")
-	}
-	return nil
 }
 
 // HashPassword generates hash for password (WOW)
@@ -54,8 +54,8 @@ func (a *User) Create() error {
 
 	a.Password = HashPassword(a.Password)
 
-	if GetDB().Create(a).Error != nil {
-		return fmt.Errorf("Connection error. Failed to create account")
+	if err := GetDB().Create(a).Error; err != nil {
+		panic(fmt.Errorf("when creating in db: %v", err))
 	}
 
 	return nil
@@ -71,14 +71,15 @@ func GenerateToken(uid uint) string {
 //Login user
 func (a *User) Login() (string, error) {
 	password := a.Password
-	if err := GetDB().Where("username = ?", a.Username).First(a).Error; err == gorm.ErrRecordNotFound {
-		return "", fmt.Errorf("Username not found")
+	err := GetDB().Where("username = ?", a.Username).First(a).Error
+	if err == gorm.ErrRecordNotFound {
+		return "", ErrValidation("Username not found")
 	} else if err != nil {
-		return "", fmt.Errorf("Connection error")
+		panic(fmt.Errorf("when fetching from db: %v", err))
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(a.Password), []byte(password)); err != nil {
-		return "", fmt.Errorf("Invalid login credentials")
+		return "", ErrValidation("Invalid login credentials")
 	}
 
 	return GenerateToken(a.ID), nil
