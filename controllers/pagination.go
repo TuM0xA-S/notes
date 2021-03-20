@@ -21,10 +21,15 @@ func Page(notes *gorm.DB, page int) ([]map[string]interface{}, error) {
 }
 
 // PaginationData ...
-func PaginationData(cur, total int) map[string]int {
-	pag := map[string]int{
+func PaginationData(cur int, db *gorm.DB) map[string]interface{} {
+	var count int64
+	err := db.Count(&count).Error
+	if err != nil {
+		panic(err)
+	}
+	pag := map[string]interface{}{
 		"current_page": cur,
-		"max_page":     total,
+		"max_page":     count,
 		"per_page":     Cfg.PerPage,
 	}
 	return pag

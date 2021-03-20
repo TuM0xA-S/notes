@@ -87,7 +87,7 @@ var CreateNote = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 
 //NotesList for user controller
 var NotesList = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
-	query := models.GetDB().Model(&models.Note{}).Select("title", "id").Where("user_id = ?", GetUserID(r)).Order("updated_at DESC")
+	query := models.GetDB().Model(&models.Note{}).Select("id").Where("user_id = ?", GetUserID(r)).Order("updated_at DESC")
 	page := GetPage(r)
 	notes, err := Page(query, page)
 	if err != nil {
@@ -95,13 +95,14 @@ var NotesList = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	}
 	resp := util.ResponseBaseOK()
 	resp["notes"] = notes
+	resp["pagination"] = PaginationData(page, models.GetDB().Model(&models.Note{}))
 
 	util.RespondWithJSON(w, 200, resp)
 })
 
 //PublishedNotesList ...
 var PublishedNotesList = func(w http.ResponseWriter, r *http.Request) {
-	query := models.GetDB().Model(&models.Note{}).Select("title", "id").Where("published").Order("updated_at DESC")
+	query := models.GetDB().Model(&models.Note{}).Select("id").Where("published").Order("updated_at DESC")
 	page := GetPage(r)
 	notes, err := Page(query, page)
 	if err != nil {
@@ -109,6 +110,7 @@ var PublishedNotesList = func(w http.ResponseWriter, r *http.Request) {
 	}
 	resp := util.ResponseBaseOK()
 	resp["notes"] = notes
+	resp["pagination"] = PaginationData(page, models.GetDB().Model(&models.Note{}))
 
 	util.RespondWithJSON(w, 200, resp)
 }

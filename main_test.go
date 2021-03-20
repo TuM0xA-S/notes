@@ -126,9 +126,12 @@ func (n *NotesTestSuite) TestCreateNote() {
 
 func (n *NotesTestSuite) TestNotesList() {
 	user := CreateUserTest()
-	expectedTitles := []string{"title 1", "title 2", "another stuff"}
-	for _, title := range expectedTitles {
-		models.GetDB().Create(&models.Note{Title: title, UserID: user.ID})
+	titles := []string{"title 1", "title 2", "another stuff"}
+	expectedIDs := []uint{}
+	for _, title := range titles {
+		note := &models.Note{Title: title, UserID: user.ID}
+		models.GetDB().Create(note)
+		expectedIDs = append(expectedIDs, note.ID)
 	}
 
 	client := &http.Client{}
@@ -142,13 +145,14 @@ func (n *NotesTestSuite) TestNotesList() {
 	rd := &ResponseData{}
 	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
 	n.Require().True(rd.Success, rd.Message)
+	n.Require().NotEmpty(rd.Pagination, "this response should have pagination info")
 
-	actualTitles := []string{}
+	actualIDs := []uint{}
 	for _, n := range rd.Notes {
-		actualTitles = append(actualTitles, n.Title)
+		actualIDs = append(actualIDs, n.ID)
 	}
 
-	n.Require().ElementsMatch(actualTitles, expectedTitles)
+	n.Require().ElementsMatch(actualIDs, expectedIDs)
 }
 
 func (n *NotesTestSuite) TestPublishedNotesList() {
@@ -171,7 +175,7 @@ func (n *NotesTestSuite) TestPublishedNotesList() {
 	}
 	user2.Create()
 
-	expectedTitles := []string{"title 1", "title 2"}
+	expectedIDs := []uint{user1.Notes[0].ID, user2.Notes[0].ID}
 
 	resp := Must(http.Get(n.ts.URL + "/api/notes"))
 	n.Require().Equal(200, resp.StatusCode)
@@ -179,13 +183,14 @@ func (n *NotesTestSuite) TestPublishedNotesList() {
 	rd := &ResponseData{}
 	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
 	n.Require().True(rd.Success, rd.Message)
+	n.Require().NotEmpty(rd.Pagination, "this response should have pagination info")
 
-	actualTitles := []string{}
+	actualIDs := []uint{}
 	for _, n := range rd.Notes {
-		actualTitles = append(actualTitles, n.Title)
+		actualIDs = append(actualIDs, n.ID)
 	}
 
-	n.Require().ElementsMatch(actualTitles, expectedTitles)
+	n.Require().ElementsMatch(actualIDs, expectedIDs)
 }
 
 func (n *NotesTestSuite) TestNoteDetail() {
@@ -306,13 +311,14 @@ func (n *NotesTestSuite) TestPagination() {
 	rd := &ResponseData{}
 	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
 	n.Require().True(rd.Success, rd.Message)
+	n.Require().NotEmpty(rd.Pagination, "this response should have pagination info")
 
-	actualTitles := []string{}
+	actualIDs := []uint{}
 	for _, n := range rd.Notes {
-		actualTitles = append(actualTitles, n.Title)
+		actualIDs = append(actualIDs, n.ID)
 	}
 
-	n.Require().ElementsMatch(actualTitles, []string{"title 0"})
+	n.Require().ElementsMatch(actualIDs, []uint{1})
 }
 
 func (n *NotesTestSuite) TestNotePublishedDetail() {
@@ -409,4 +415,5 @@ type ResponseData struct {
 	AccessToken string        `json:"access_token"`
 	Note        models.Note   `json:"note"`
 	User        models.User   `json:"user"`
+	Pagination  interface{}   `json:"pagination"`
 }
