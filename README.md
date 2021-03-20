@@ -30,6 +30,7 @@ note detail(public) | `GET /api/notes/{note_id}`
 * [x] api base
 * [x] pagination
 * [ ] filters
-* [ ] rework error handling
+* [x] rework error handling
 * [ ] reorganize tests
+* [ ] create desktop gui
 
