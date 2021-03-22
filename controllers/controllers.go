@@ -87,30 +87,30 @@ var CreateNote = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 
 //NotesList for user controller
 var NotesList = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
-	query := models.GetDB().Model(&models.Note{}).Select("id").Where("user_id = ?", GetUserID(r)).Order("updated_at DESC")
-	page := GetPage(r)
-	notes, err := Page(query, page)
+	notes := &[]map[string]interface{}{}
+	err := models.GetDB().Model(&models.Note{}).Scopes(OwnedBy(r), Paginate(r), NewFirst).
+		Select("id").Find(notes).Error
 	if err != nil {
 		panic(err)
 	}
 	resp := util.ResponseBaseOK()
 	resp["notes"] = notes
-	resp["pagination"] = PaginationData(page, models.GetDB().Model(&models.Note{}))
+	resp["pagination"] = PaginationData(r, models.GetDB().Model(&models.Note{}).Scopes(OwnedBy(r)))
 
 	util.RespondWithJSON(w, 200, resp)
 })
 
 //PublishedNotesList ...
 var PublishedNotesList = func(w http.ResponseWriter, r *http.Request) {
-	query := models.GetDB().Model(&models.Note{}).Select("id").Where("published").Order("updated_at DESC")
-	page := GetPage(r)
-	notes, err := Page(query, page)
+	notes := &[]map[string]interface{}{}
+	err := models.GetDB().Model(&models.Note{}).Scopes(Published, Paginate(r), NewFirst).
+		Select("id").Find(notes).Error
 	if err != nil {
 		panic(err)
 	}
 	resp := util.ResponseBaseOK()
 	resp["notes"] = notes
-	resp["pagination"] = PaginationData(page, models.GetDB().Model(&models.Note{}))
+	resp["pagination"] = PaginationData(r, models.GetDB().Model(&models.Note{}).Scopes(Published))
 
 	util.RespondWithJSON(w, 200, resp)
 }
@@ -170,7 +170,7 @@ var NoteRemove = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	if err == gorm.ErrRecordNotFound {
 		util.RespondWithError(w, 404, "no such note")
 	} else if err != nil {
-		panic("troubles with db")
+		panic(err)
 	} else {
 		util.RespondWithJSON(w, 200, util.ResponseBaseOK())
 	}
@@ -196,8 +196,10 @@ var NoteUpdate = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 
 	if err == gorm.ErrRecordNotFound {
 		util.RespondWithError(w, 404, "no such note")
+	} else if models.IsErrValidation(err) {
+		util.RespondWithError(w, 422, err.Error())
 	} else if err != nil {
-		panic("troubles with db")
+		panic(err)
 	} else {
 		util.RespondWithJSON(w, 200, util.ResponseBaseOK())
 	}

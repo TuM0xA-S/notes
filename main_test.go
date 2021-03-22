@@ -312,6 +312,7 @@ func (n *NotesTestSuite) TestPagination() {
 	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
 	n.Require().True(rd.Success, rd.Message)
 	n.Require().NotEmpty(rd.Pagination, "this response should have pagination info")
+	n.Require().Equal(2, rd.Pagination["max_page"])
 
 	actualIDs := []uint{}
 	for _, n := range rd.Notes {
@@ -409,11 +410,11 @@ func AsJSONBody(obj interface{}) io.Reader {
 type Object map[string]interface{}
 
 type ResponseData struct {
-	Success     bool          `json:"success"`
-	Message     string        `json:"message"`
-	Notes       []models.Note `json:"notes"`
-	AccessToken string        `json:"access_token"`
-	Note        models.Note   `json:"note"`
-	User        models.User   `json:"user"`
-	Pagination  interface{}   `json:"pagination"`
+	Success     bool           `json:"success"`
+	Message     string         `json:"message"`
+	Notes       []models.Note  `json:"notes"`
+	AccessToken string         `json:"access_token"`
+	Note        models.Note    `json:"note"`
+	User        models.User    `json:"user"`
+	Pagination  map[string]int `json:"pagination"`
 }

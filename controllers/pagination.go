@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -10,26 +9,24 @@ import (
 	"gorm.io/gorm"
 )
 
-// Page return certain page of notes
-func Page(notes *gorm.DB, page int) ([]map[string]interface{}, error) {
-	res := []map[string]interface{}{}
-	err := notes.Offset((page - 1) * Cfg.PerPage).Limit(Cfg.PerPage).Find(&res).Error
-	if err != nil {
-		return nil, fmt.Errorf("when fetching page: %v", err)
+//Paginate scope
+func Paginate(r *http.Request) func(db *gorm.DB) *gorm.DB {
+	page := GetPage(r)
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Offset((page - 1) * Cfg.PerPage).Limit(Cfg.PerPage)
 	}
-	return res, nil
 }
 
 // PaginationData ...
-func PaginationData(cur int, db *gorm.DB) map[string]interface{} {
+func PaginationData(req *http.Request, db *gorm.DB) map[string]interface{} {
 	var count int64
 	err := db.Count(&count).Error
 	if err != nil {
 		panic(err)
 	}
 	pag := map[string]interface{}{
-		"current_page": cur,
-		"max_page":     count,
+		"current_page": GetPage(req),
+		"max_page":     (int(count)-1)/Cfg.PerPage + 1,
 		"per_page":     Cfg.PerPage,
 	}
 	return pag

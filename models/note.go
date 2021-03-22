@@ -59,5 +59,17 @@ func (n *Note) Remove() error {
 
 //Update note
 func (n *Note) Update(patch *Note) error {
-	return GetDB().Where(n).Updates(patch).Error
+	if err := n.Get(); err != nil {
+		return err
+	}
+	if patch.Body != "" {
+		n.Body = patch.Body
+	}
+	if patch.Title != "" {
+		n.Title = patch.Title
+	}
+	if err := n.Validate(); err != nil {
+		return err
+	}
+	return GetDB().Save(n).Error
 }
