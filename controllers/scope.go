@@ -29,5 +29,5 @@ func Notes(db *gorm.DB) *gorm.DB { // not working (why??)
 
 // NewFirst (by update)
 func NewFirst(db *gorm.DB) *gorm.DB {
-	return db.Order("updated_at DESC")
+	return db.Order("created_at DESC")
 }
