@@ -253,8 +253,10 @@ func (n *NotesTestSuite) TestNoteUpdate() {
 	note.Create()
 
 	expectedBody := "another body"
-	patchNote := &models.Note{
-		Body: expectedBody,
+	expectedPublished := true
+	patchNote := &models.NotePatch{
+		Body:      &expectedBody,
+		Published: &expectedPublished,
 	}
 
 	client := &http.Client{}

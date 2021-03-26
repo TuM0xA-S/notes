@@ -209,7 +209,7 @@ var NoteUpdate = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	note := &models.Note{}
 	note.ID = noteID
 	note.UserID = userID
-	patch := &models.Note{}
+	patch := &models.NotePatch{}
 	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(patch); err != nil {
 		util.RespondWithError(w, 400, "invalid request")

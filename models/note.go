@@ -58,19 +58,29 @@ func (n *Note) Remove() error {
 }
 
 //Update note
-func (n *Note) Update(patch *Note) error {
+func (n *Note) Update(patch *NotePatch) error {
 	if err := n.Get(); err != nil {
 		return err
 	}
-	if patch.Body != "" {
-		n.Body = patch.Body
+	if patch.Body != nil {
+		n.Body = *patch.Body
 	}
-	if patch.Title != "" {
-		n.Title = patch.Title
+	if patch.Title != nil {
+		n.Title = *patch.Title
+	}
+	if patch.Published != nil {
+		n.Published = *patch.Published
 	}
 
 	if err := n.Validate(); err != nil {
 		return err
 	}
 	return GetDB().Save(n).Error
+}
+
+// NotePatch with nullable fields
+type NotePatch struct {
+	Body      *string
+	Title     *string
+	Published *bool
 }
