@@ -11,7 +11,7 @@ useless, but production ready(?)
 action              | request
 ------------------- | ---------------
 create user		    | `POST /api/users`
-login	    	    | `POST /api/users/login`
+login	    	    | `POST /api/me`
 notes list  	    | `GET /api/me/notes`
 create note 	    | `POST /api/me/notes`
 note detail(yours)  | `GET /api/me/notes/{note_id}`

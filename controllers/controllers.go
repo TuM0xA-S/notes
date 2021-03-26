@@ -89,7 +89,7 @@ var CreateNote = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 var NotesList = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	notes := &[]map[string]interface{}{}
 	err := models.GetDB().Model(&models.Note{}).Scopes(OwnedBy(r), Paginate(r), NewFirst).
-		Select("id").Find(notes).Error
+		Omit("body").Find(notes).Error
 	if err != nil {
 		panic(err)
 	}
@@ -104,7 +104,7 @@ var NotesList = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 var PublishedNotesList = func(w http.ResponseWriter, r *http.Request) {
 	notes := &[]map[string]interface{}{}
 	err := models.GetDB().Model(&models.Note{}).Scopes(Published, Paginate(r), NewFirst).
-		Select("id").Find(notes).Error
+		Omit("body").Find(notes).Error
 	if err != nil {
 		panic(err)
 	}

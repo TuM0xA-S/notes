@@ -88,7 +88,7 @@ func (n *NotesTestSuite) TestCreateUser() {
 
 func (n *NotesTestSuite) TestLogin() {
 	CreateUserTest()
-	r := Must(http.Post(n.ts.URL+"/api/users/login", "application/json", UserBodyDataTest()))
+	r := Must(http.Post(n.ts.URL+"/api/me", "application/json", UserBodyDataTest()))
 
 	n.Require().Equal(200, r.StatusCode)
 
@@ -127,11 +127,11 @@ func (n *NotesTestSuite) TestCreateNote() {
 func (n *NotesTestSuite) TestNotesList() {
 	user := CreateUserTest()
 	titles := []string{"title 1", "title 2", "another stuff"}
-	expectedIDs := []uint{}
+	expectedNotes := []models.Note{}
 	for _, title := range titles {
-		note := &models.Note{Title: title, UserID: user.ID}
-		models.GetDB().Create(note)
-		expectedIDs = append(expectedIDs, note.ID)
+		note := models.Note{Title: title, UserID: user.ID}
+		note.Create()
+		expectedNotes = append(expectedNotes, note)
 	}
 
 	client := &http.Client{}
@@ -147,12 +147,7 @@ func (n *NotesTestSuite) TestNotesList() {
 	n.Require().True(rd.Success, rd.Message)
 	n.Require().NotEmpty(rd.Pagination, "this response should have pagination info")
 
-	actualIDs := []uint{}
-	for _, n := range rd.Notes {
-		actualIDs = append(actualIDs, n.ID)
-	}
-
-	n.Require().ElementsMatch(actualIDs, expectedIDs)
+	n.Require().ElementsMatch(expectedNotes, rd.Notes)
 }
 
 func (n *NotesTestSuite) TestPublishedNotesList() {
@@ -175,7 +170,7 @@ func (n *NotesTestSuite) TestPublishedNotesList() {
 	}
 	user2.Create()
 
-	expectedIDs := []uint{user1.Notes[0].ID, user2.Notes[0].ID}
+	expectedNotes := []models.Note{user1.Notes[0], user2.Notes[0]}
 
 	resp := Must(http.Get(n.ts.URL + "/api/notes"))
 	n.Require().Equal(200, resp.StatusCode)
@@ -185,12 +180,7 @@ func (n *NotesTestSuite) TestPublishedNotesList() {
 	n.Require().True(rd.Success, rd.Message)
 	n.Require().NotEmpty(rd.Pagination, "this response should have pagination info")
 
-	actualIDs := []uint{}
-	for _, n := range rd.Notes {
-		actualIDs = append(actualIDs, n.ID)
-	}
-
-	n.Require().ElementsMatch(actualIDs, expectedIDs)
+	n.Require().ElementsMatch(expectedNotes, rd.Notes)
 }
 
 func (n *NotesTestSuite) TestNoteDetail() {

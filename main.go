@@ -30,7 +30,7 @@ func GetRouter() http.Handler {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/notes", controllers.PublishedNotesList).Methods("GET")
 	router.HandleFunc("/api/users", controllers.CreateAccount).Methods("POST")
-	router.HandleFunc("/api/users/login", controllers.Login).Methods("POST")
+	router.HandleFunc("/api/me", controllers.Login).Methods("POST")
 	router.HandleFunc("/api/me/notes", controllers.NotesList).Methods("GET")
 	router.HandleFunc("/api/me/notes", controllers.CreateNote).Methods("POST")
 	router.HandleFunc("/api/me/notes/{note_id:[0-9]+}", controllers.NoteDetails).Methods("GET")
