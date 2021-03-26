@@ -20,11 +20,13 @@ remove note 	    | `DELETE /api/me/notes/{note_id}`
 user detail 	    | `GET /api/me`
 published notes     | `GET /api/notes`
 note detail(public) | `GET /api/notes/{note_id}`
+user detail			| `GET /api/user/{user_id}`
 
 * to regiser/login provide `username` and `password`
 * `title` and `body` to create note
 * note can be published by setting `published` field to `true`
 * `page` query parameter for specifying page
+* `no_body=true` for omit note body
 
 ### tasks
 * [x] api base
