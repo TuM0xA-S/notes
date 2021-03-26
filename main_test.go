@@ -217,6 +217,15 @@ func (n *NotesTestSuite) TestNoteDetail() {
 	n.Assert().Equal(expectedNote.Title, rd.Note.Title)
 	n.Assert().Equal(expectedNote.Body, rd.Note.Body)
 	n.Assert().Equal(expectedNote.ID, rd.Note.ID)
+
+	req.URL.RawQuery = "no_body=true"
+	resp = Must(client.Do(req))
+	n.Require().Equal(200, resp.StatusCode)
+
+	rd = &ResponseData{}
+	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
+	n.Require().True(rd.Success, rd.Message)
+	n.Assert().Empty(rd.Note.Body)
 }
 
 func (n *NotesTestSuite) TestNoteRemove() {
@@ -326,6 +335,7 @@ func (n *NotesTestSuite) TestNotePublishedDetail() {
 	user := CreateUserTest()
 	note := &models.Note{
 		Title:     "not matters",
+		Body:      "not empty",
 		UserID:    user.ID,
 		Published: true,
 	}
@@ -333,6 +343,13 @@ func (n *NotesTestSuite) TestNotePublishedDetail() {
 
 	resp := Must(http.Get(fmt.Sprintf(n.ts.URL+"/api/notes/%v", note.ID)))
 	n.Require().Equal(200, resp.StatusCode)
+
+	resp = Must(http.Get(fmt.Sprintf(n.ts.URL+"/api/notes/%v?no_body=true", note.ID)))
+	n.Require().Equal(200, resp.StatusCode)
+	rd := &ResponseData{}
+	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
+	n.Require().True(rd.Success, rd.Message)
+	n.Assert().Empty(rd.Note.Body)
 
 	note.Published = false
 	note.Save()

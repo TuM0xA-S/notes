@@ -127,7 +127,7 @@ func PublishedNoteDetail(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	resp := util.ResponseBaseOK()
-	resp["note"] = note
+	resp["note"] = notePrework(r, note)
 
 	util.RespondWithJSON(w, 200, resp)
 }
@@ -149,6 +149,13 @@ func AnotherUserDetail(w http.ResponseWriter, r *http.Request) {
 	util.RespondWithJSON(w, 200, resp)
 }
 
+func notePrework(r *http.Request, n *models.Note) *models.Note {
+	if r.URL.Query().Get("no_body") == "true" {
+		n.Body = ""
+	}
+	return n
+}
+
 //NoteDetails ....
 var NoteDetails = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserID(r)
@@ -167,7 +174,7 @@ var NoteDetails = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) 
 		panic(err)
 	} else {
 		resp := util.ResponseBaseOK()
-		resp["note"] = note
+		resp["note"] = notePrework(r, note)
 		util.RespondWithJSON(w, 200, resp)
 	}
 })
