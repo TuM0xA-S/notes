@@ -147,6 +147,10 @@ func (n *NotesTestSuite) TestNotesList() {
 	n.Require().True(rd.Success, rd.Message)
 	n.Require().NotEmpty(rd.Pagination, "this response should have pagination info")
 
+	for _, note := range rd.Notes {
+		note.UpdatedAt = note.UpdatedAt.Local()
+		note.CreatedAt = note.CreatedAt.Local()
+	}
 	n.Require().ElementsMatch(expectedNotes, rd.Notes)
 }
 
@@ -179,6 +183,11 @@ func (n *NotesTestSuite) TestPublishedNotesList() {
 	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
 	n.Require().True(rd.Success, rd.Message)
 	n.Require().NotEmpty(rd.Pagination, "this response should have pagination info")
+
+	for _, note := range rd.Notes {
+		note.UpdatedAt = note.UpdatedAt.Local()
+		note.CreatedAt = note.CreatedAt.Local()
+	}
 
 	n.Require().ElementsMatch(expectedNotes, rd.Notes)
 }
