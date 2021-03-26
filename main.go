@@ -29,16 +29,16 @@ type InternalServerErrorResponder struct{}
 func GetRouter() http.Handler {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/notes", controllers.PublishedNotesList).Methods("GET")
-	router.HandleFunc("/api/user/create", controllers.CreateAccount).Methods("POST")
-	router.HandleFunc("/api/user/login", controllers.Login).Methods("POST")
+	router.HandleFunc("/api/users", controllers.CreateAccount).Methods("POST")
+	router.HandleFunc("/api/users/login", controllers.Login).Methods("POST")
 	router.HandleFunc("/api/me/notes", controllers.NotesList).Methods("GET")
-	router.HandleFunc("/api/me/notes/create", controllers.CreateNote).Methods("POST")
+	router.HandleFunc("/api/me/notes", controllers.CreateNote).Methods("POST")
 	router.HandleFunc("/api/me/notes/{note_id:[0-9]+}", controllers.NoteDetails).Methods("GET")
 	router.HandleFunc("/api/me/notes/{note_id:[0-9]+}", controllers.NoteRemove).Methods("DELETE")
 	router.HandleFunc("/api/me/notes/{note_id:[0-9]+}", controllers.NoteUpdate).Methods("PUT")
 	router.HandleFunc("/api/me", controllers.UserDetails).Methods("GET")
 	router.HandleFunc("/api/notes/{note_id:[0-9]+}", controllers.PublishedNoteDetail).Methods("GET")
-	router.HandleFunc("/api/user/{user_id:[0-9]+}", controllers.AnotherUserDetail).Methods("GET")
+	router.HandleFunc("/api/users/{user_id:[0-9]+}", controllers.AnotherUserDetail).Methods("GET")
 
 	n := negroni.New()
 

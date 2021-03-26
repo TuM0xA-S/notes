@@ -10,17 +10,17 @@ useless, but production ready(?)
 ### api
 action              | request
 ------------------- | ---------------
-create user		    | `POST /api/user/create`
-login	    	    | `POST /api/user/login`
+create user		    | `POST /api/users`
+login	    	    | `POST /api/users/login`
 notes list  	    | `GET /api/me/notes`
-create note 	    | `POST /api/me/notes/create`
+create note 	    | `POST /api/me/notes`
 note detail(yours)  | `GET /api/me/notes/{note_id}`
 update note 	    | `PUT /api/me/notes/{note_id}`
 remove note 	    | `DELETE /api/me/notes/{note_id}`
 user detail 	    | `GET /api/me`
 published notes     | `GET /api/notes`
 note detail(public) | `GET /api/notes/{note_id}`
-user detail			| `GET /api/user/{user_id}`
+user detail			| `GET /api/users/{user_id}`
 
 * to regiser/login provide `username` and `password`
 * `title` and `body` to create note

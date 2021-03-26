@@ -71,7 +71,7 @@ func (n *NotesTestSuite) TearDownSuite() {
 }
 
 func (n *NotesTestSuite) TestCreateUser() {
-	r := Must(http.Post(n.ts.URL+"/api/user/create", "application/json", UserBodyDataTest()))
+	r := Must(http.Post(n.ts.URL+"/api/users", "application/json", UserBodyDataTest()))
 
 	n.Require().Equal(200, r.StatusCode)
 	n.Require().Equal("application/json", r.Header.Get("Content-Type"))
@@ -88,7 +88,7 @@ func (n *NotesTestSuite) TestCreateUser() {
 
 func (n *NotesTestSuite) TestLogin() {
 	CreateUserTest()
-	r := Must(http.Post(n.ts.URL+"/api/user/login", "application/json", UserBodyDataTest()))
+	r := Must(http.Post(n.ts.URL+"/api/users/login", "application/json", UserBodyDataTest()))
 
 	n.Require().Equal(200, r.StatusCode)
 
@@ -110,7 +110,7 @@ func (n *NotesTestSuite) TestCreateNote() {
 	title := "just text"
 	body := "another text"
 
-	req, _ := http.NewRequest("POST", n.ts.URL+"/api/me/notes/create", NoteBodyDataTest(title, body))
+	req, _ := http.NewRequest("POST", n.ts.URL+"/api/me/notes", NoteBodyDataTest(title, body))
 	AuthorizeRequest(req, CreateUserTest())
 
 	resp := Must(client.Do(req))
@@ -363,7 +363,7 @@ func (n *NotesTestSuite) TestUnauth() {
 		method, url string
 	}{
 		{"GET", "/api/me/notes"},
-		{"POST", "/api/me/notes/create"},
+		{"POST", "/api/me/notes"},
 		{"GET", "/api/me/notes/1"},
 		{"DELETE", "/api/me/notes/1"},
 		{"PUT", "/api/me/notes/1"},
@@ -427,7 +427,7 @@ func AsJSONBody(obj interface{}) io.Reader {
 func (n *NotesTestSuite) TestAnotherUserDetail() {
 	user := CreateUserTest()
 
-	resp := Must(http.Get(fmt.Sprintf(n.ts.URL+"/api/user/%d", user.ID)))
+	resp := Must(http.Get(fmt.Sprintf(n.ts.URL+"/api/users/%d", user.ID)))
 	n.Require().Equal(200, resp.StatusCode)
 
 	rd := &ResponseData{}
