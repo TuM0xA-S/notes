@@ -132,6 +132,23 @@ func PublishedNoteDetail(w http.ResponseWriter, r *http.Request) {
 	util.RespondWithJSON(w, 200, resp)
 }
 
+// AnotherUserDetail ...
+func AnotherUserDetail(w http.ResponseWriter, r *http.Request) {
+	user := &models.User{}
+	fmt.Sscan(mux.Vars(r)["user_id"], &user.ID)
+
+	err := user.Get()
+	if err == gorm.ErrRecordNotFound {
+		util.RespondWithError(w, 404, "no such user")
+	} else if err != nil {
+		panic(err)
+	}
+	user.Password = ""
+	resp := util.ResponseBaseOK()
+	resp["user"] = user
+	util.RespondWithJSON(w, 200, resp)
+}
+
 //NoteDetails ....
 var NoteDetails = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserID(r)

@@ -407,6 +407,19 @@ func AsJSONBody(obj interface{}) io.Reader {
 	return b
 }
 
+func (n *NotesTestSuite) TestAnotherUserDetail() {
+	user := CreateUserTest()
+
+	resp := Must(http.Get(fmt.Sprintf(n.ts.URL+"/api/user/%d", user.ID)))
+	n.Require().Equal(200, resp.StatusCode)
+
+	rd := &ResponseData{}
+	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd))
+
+	n.Require().Equal(user.Username, rd.User.Username)
+	n.Require().Empty(rd.User.Password, "password should not be sent")
+}
+
 type Object map[string]interface{}
 
 type ResponseData struct {

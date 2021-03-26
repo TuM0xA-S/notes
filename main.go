@@ -38,6 +38,7 @@ func GetRouter() http.Handler {
 	router.HandleFunc("/api/me/notes/{note_id:[0-9]+}", controllers.NoteUpdate).Methods("PUT")
 	router.HandleFunc("/api/me", controllers.UserDetails).Methods("GET")
 	router.HandleFunc("/api/notes/{note_id:[0-9]+}", controllers.PublishedNoteDetail).Methods("GET")
+	router.HandleFunc("/api/user/{user_id:[0-9]+}", controllers.AnotherUserDetail).Methods("GET")
 
 	n := negroni.New()
 
@@ -60,7 +61,7 @@ func GetRouter() http.Handler {
 func main() {
 	DBURI := fmt.Sprintf("root:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", Cfg.DBPassword, Cfg.DBHost, Cfg.DBName)
 	log.Println("db_uri:", DBURI)
-	conn, err := gorm.Open(mysql.Open(DBURI))
+	conn, err := gorm.Open(mysql.Open(DBURI), &gorm.Config{DisableForeignKeyConstraintWhenMigrating: true})
 	if err != nil {
 		log.Fatal("when connecting to db:", err)
 	}
