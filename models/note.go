@@ -68,6 +68,7 @@ func (n *Note) Update(patch *Note) error {
 	if patch.Title != "" {
 		n.Title = patch.Title
 	}
+
 	if err := n.Validate(); err != nil {
 		return err
 	}
