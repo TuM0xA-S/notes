@@ -147,9 +147,9 @@ func (n *NotesTestSuite) TestNotesList() {
 	n.Require().True(rd.Success, rd.Message)
 	n.Require().NotEmpty(rd.Pagination, "this response should have pagination info")
 
-	for _, note := range rd.Notes {
-		note.UpdatedAt = note.UpdatedAt.Local()
-		note.CreatedAt = note.CreatedAt.Local()
+	for i := range rd.Notes {
+		rd.Notes[i].UpdatedAt = rd.Notes[i].UpdatedAt.Local()
+		rd.Notes[i].CreatedAt = rd.Notes[i].CreatedAt.Local()
 	}
 	n.Require().ElementsMatch(expectedNotes, rd.Notes)
 }
@@ -184,11 +184,10 @@ func (n *NotesTestSuite) TestPublishedNotesList() {
 	n.Require().True(rd.Success, rd.Message)
 	n.Require().NotEmpty(rd.Pagination, "this response should have pagination info")
 
-	for _, note := range rd.Notes {
-		note.UpdatedAt = note.UpdatedAt.Local()
-		note.CreatedAt = note.CreatedAt.Local()
+	for i := range rd.Notes {
+		rd.Notes[i].UpdatedAt = rd.Notes[i].UpdatedAt.Local()
+		rd.Notes[i].CreatedAt = rd.Notes[i].CreatedAt.Local()
 	}
-
 	n.Require().ElementsMatch(expectedNotes, rd.Notes)
 }
 
