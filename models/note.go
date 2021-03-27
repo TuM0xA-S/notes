@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"notes/config"
 )
 
 //Note with title, body and ownwer
@@ -18,8 +19,8 @@ func (n *Note) Validate() error {
 	if len(n.Title) < 3 || len(n.Title) > 40 {
 		return ErrValidation("Validation error. Title len should be (3 <= len <= 40)")
 	}
-	if len(n.Body) > 512 {
-		return ErrValidation("Validation error. Body is too big(max len 512)")
+	if len(n.Body) > config.Cfg.BodyLength {
+		return ErrValidation(fmt.Sprintf("Validation error. Body is too big(max len %d)", config.Cfg.BodyLength))
 	}
 
 	if n.UserID <= 0 {

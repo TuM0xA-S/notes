@@ -14,6 +14,7 @@ type Config struct {
 	DBName        string `env:"DB_NAME"`
 	DBPassword    string `env:"DB_PASSWORD"`
 	PerPage       int    `env:"PER_PAGE" envDefault:"10"`
+	BodyLength    int    `env:"BODY_LENGTH" envDefault:"1024"`
 }
 
 //Cfg - parsed instance of Config
