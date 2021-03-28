@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"notes/config"
+	"unicode/utf8"
 )
 
 //Note with title, body and ownwer
@@ -16,10 +17,10 @@ type Note struct {
 
 //Validate note
 func (n *Note) Validate() error {
-	if len(n.Title) < 3 || len(n.Title) > 40 {
-		return ErrValidation("Validation error. Title len should be (3 <= len <= 40)")
+	if utf8.RuneCountInString(n.Title) < 3 || utf8.RuneCountInString(n.Title) > config.Cfg.TitleLength {
+		return ErrValidation(fmt.Sprintf("Validation error. Title len should be (3 <= len <= %d)", config.Cfg.TitleLength))
 	}
-	if len(n.Body) > config.Cfg.BodyLength {
+	if utf8.RuneCountInString(n.Body) > config.Cfg.BodyLength {
 		return ErrValidation(fmt.Sprintf("Validation error. Body is too big(max len %d)", config.Cfg.BodyLength))
 	}
 
