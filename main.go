@@ -40,6 +40,7 @@ func GetRouter() http.Handler {
 	router.HandleFunc("/api/notes/{note_id:[0-9]+}", controllers.PublishedNoteDetail).Methods("GET")
 	router.HandleFunc("/api/users/{user_id:[0-9]+}", controllers.AnotherUserDetail).Methods("GET")
 	router.NotFoundHandler = http.HandlerFunc(controllers.NotFound)
+	router.MethodNotAllowedHandler = http.HandlerFunc(controllers.MethodNotAllowed)
 
 	n := negroni.New()
 

@@ -437,6 +437,26 @@ func (n *NotesTestSuite) TestAnotherUserDetail() {
 	n.Require().Empty(rd.User.Password, "password should not be sent")
 }
 
+func (n *NotesTestSuite) TestNotFound() {
+	resp := Must(http.Get(n.ts.URL + "/not-exists"))
+	n.Require().Equal(404, resp.StatusCode)
+
+	rd := &ResponseData{}
+	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd), "server should serve with valid json anyway")
+	n.Require().False(rd.Success)
+	n.Require().NotEmpty(rd.Message)
+}
+
+func (n *NotesTestSuite) TestMethodNotAllowed() {
+	resp := Must(http.Post(n.ts.URL+"/api/notes", "", nil))
+	n.Require().Equal(405, resp.StatusCode)
+
+	rd := &ResponseData{}
+	n.Require().Nil(json.NewDecoder(resp.Body).Decode(rd), "server should serve with valid json anyway")
+	n.Require().False(rd.Success)
+	n.Require().NotEmpty(rd.Message)
+}
+
 type Object map[string]interface{}
 
 type ResponseData struct {

@@ -68,6 +68,11 @@ func NotFound(w http.ResponseWriter, r *http.Request) {
 	util.RespondWithError(w, 404, r.URL.String()+" not found")
 }
 
+// MethodNotAllowed ...
+func MethodNotAllowed(w http.ResponseWriter, r *http.Request) {
+	util.RespondWithError(w, 405, r.Method+" not allowed")
+}
+
 //CreateNote for user controller
 var CreateNote = auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 	note := &models.Note{}
