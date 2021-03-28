@@ -34,5 +34,5 @@ user detail			| `GET /api/users/{user_id}`
 * [ ] filters
 * [x] rework error handling
 * [ ] reorganize tests
-* [ ] create desktop gui
+* [x] create desktop gui ([notesclient](https://github.com/TuM0xA-S/notesclient))
 
